@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ClassroomsController extends Controller
 {
-    public function getAllClassrooms(){
+    public function getAllClassrooms() {
+        
         //Storage::deleteDirectory('publiс/schedule');
         //Storage::createDirectory('public/schedule');
         $faculties = GetFaculties::facultiesToClassrooms();
