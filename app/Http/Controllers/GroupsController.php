@@ -22,29 +22,32 @@ use Illuminate\Support\Facades\Storage;
 class GroupsController extends Controller
 {
 
-        public function getAllGroups(){
-
-
+    public function getAllGroups()
+    {
         //Storage::deleteDirectory('public/schedule');
         //Storage::createDirectory('public/schedule');
         $faculties = GetFaculties::facultiesToGroups();
+        echo '<pre>';
+        var_dump($faculties);
+        echo '</pre>';
         $courses = null;
         $groups = Group::all();
         $faculty_id = 0;
         $group_id = 0;
         $courseName = 0;
-        return view('groups_schedule',compact('faculties','courses','groups','faculty_id','group_id','courseName'));
+        return view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
     }
-public function getFacultyGroups(FacultyRequest $request){
+    public function getFacultyGroups(FacultyRequest $request)
+    {
         set_time_limit(0);
         $faculty_id = $request['faculty'];
-        if(isset($_POST['courses'])) {
+        if (isset($_POST['courses'])) {
             $faculties = GetFaculties::facultiesToGroups();
             $courses = GetGroupsCourses::courses($faculty_id);
             $groups = GetGroups::groups($faculty_id);
             $group_id = 0;
             $courseName = 0;
-            return response()->view('groups_schedule',compact('faculties','courses','groups','faculty_id','group_id','courseName'));
+            return response()->view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
         }
     }
 
@@ -56,33 +59,34 @@ public function getFacultyGroups(FacultyRequest $request){
         $courseName = $course[1];
         $group_id = 0;
         $faculties = GetFaculties::facultiesToGroups();
-        $groups = GetGroups::groups($faculty_id,$courseName);
+        $groups = GetGroups::groups($faculty_id, $courseName);
         $courses = GetGroupsCourses::courses($faculty_id);
         if (isset($_POST['groups'])) {
-            return response()->view('groups_schedule',compact('faculties','courses','groups','faculty_id','group_id','courseName'));
+            return response()->view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
         } elseif (isset($_POST['show'])) {
-            $path = CreateGroups::createGroups($courseName,$faculty_id);
+            $path = CreateGroups::createGroups($courseName, $faculty_id);
             $html = $path;
             $facultyName = Faculty::where('id', $faculty_id)->value('shortNameFaculty');
             $title = 'Расписание курса ' . $courseName . ' ' . $facultyName;
-            return response()->view('groups_schedule_table',compact('faculties','courses','groups','faculty_id','group_id','courseName','html','title'));
+            return response()->view('groups_schedule_table', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'html', 'title'));
         }
     }
-    public function getGroup(GroupRequest $request){
+    public function getGroup(GroupRequest $request)
+    {
         set_time_limit(0);
         $group_id = $request['group'];
-        if(isset($_POST['show'])) {
-            $group = Group::where('id',$group_id)->get();
+        if (isset($_POST['show'])) {
+            $group = Group::where('id', $group_id)->get();
             $faculty_id = $group[0]['faculty_id'];
             $faculties = GetFaculties::facultiesToGroups();
             $courseName = $group[0]['course'];
             $courses = GetGroupsCourses::courses($faculty_id);
-            $groups = GetGroups::groups($faculty_id,$courseName);
+            $groups = GetGroups::groups($faculty_id, $courseName);
             $path = CreateGroups::createGroup($group_id);
             $html = $path;
             $groupName = $group[0]['nameGroup'];
             $title = 'Расписание группы ' . $groupName;
-            return response()->view('groups_schedule_table',compact('faculties','courses','groups','faculty_id','group_id','courseName','html','title'));
+            return response()->view('groups_schedule_table', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'html', 'title'));
         }
     }
 }

@@ -1,69 +1,80 @@
 @extends('layouts.app')
 
 @section('title')
-    Главная страница
+Главная страница
 @endsection
 
 @section('content')
-    <div class="container">
-    <div class="pricing-header p-4 m-4 pb-md-4 mx-auto text-center">
-        <h2 class="display-4 fw-normal text-black">Расписание групп, преподавателей, аудиторий</h2>
+
+<main class="site-wrapper">
+    <div class="container mt-2">
+        <div class="row align-items-center">
+            <div class="col-sm-3 mb-2"><a class="logo" href="https://istu.ru/" target="_blank"></a></div>
+            <div class="col-sm-auto mb-2">
+                <p class="name-university">ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ ВЫСШЕГО
+                    ОБРАЗОВАНИЯ</p>
+                <p class="name-university">ИЖЕВСКИЙ ГОСУДАРСТВЕННЫЙ ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ ИМЕНИ М.Т. КАЛАШНИКОВА</p>
+            </div>
+        </div>
     </div>
-        <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-            <div class="col" style="height: 600px;">
-                <div class="card mb-4 rounded-3 shadow-sm" >
-                    <div class="card-header py-3">
-                        <h4 class="my-0 fw-normal">Расписание групп</h4>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mt-3 mb-4">
-                            <li class="fst-italic">Расписание групп</li>
-                            <li class="fst-italic">по</li>
-                            <li class="fst-italic">факультетам/институтам</li>
-                            <li class="fst-italic">и</li>
-                            <li class="fst-italic">курсам</li>
-                            <li class="text-white">и</li>
-                        </ul>
-                        <a class="w-100 btn btn-lg btn-primary" href="{{route('get_groups')}}">Перейти</a>
-                    </div>
+    <div class="container mt-3">
+
+        <div class="row row-auto">
+            <div class="col-sm-3">
+                <div class="card small-card mb-3">
+                    <ul class="list-group list-group-flush" id="myTab" role="tablist">
+                        <li class="list-group-item bg-light" role="presentation">Расписание</li>
+                        <li class="list-group-item" role="presentation">
+                            <button class="nav-link commands" id="group-tab" data-bs-toggle="tab"
+                                data-bs-target="#group-tab-pane" type="button" role="tab"
+                                aria-controls="group-tab-pane">Для групп</button>
+                        </li>
+                        <li class="list-group-item" role="presentation">
+                            <button class="nav-link commands" id="teacher-tab" data-bs-toggle="tab"
+                                data-bs-target="#teacher-tab-pane" type="button" role="tab"
+                                aria-controls="teacher-tab-pane">Для преподавателей</button>
+                        </li>
+                        <li class="list-group-item" role="presentation">
+                            <button class="nav-link commands" id="room-tab" data-bs-toggle="tab"
+                                data-bs-target="#room-tab-pane" type="button" role="tab"
+                                aria-controls="room-tab-pane">Для аудиторий</button>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="col">
-                <div class="card mb-4 rounded-3 shadow-sm">
-                    <div class="card-header py-3">
-                        <h4 class="my-0 fw-normal">Расписание преподавателей</h4>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mt-3 mb-4">
-                            <li class="fst-italic">Расписание преподавателей вуза</li>
-                            <li class="fst-italic">по</li>
-                            <li class="fst-italic">факультетам/институтам,</li>
-                            <li class="fst-italic">кафедрам</li>
-                            <li class="fst-italic">и фамилиям</li>
-                            <li class="text-white">и</li>
-                        </ul>
-                        <a class="w-100 btn btn-lg btn-primary" href="{{route('get_teachers')}}">Перейти</a>
-                    </div>
-                </div>
+
+            <div class="col-sm-9 tab-content" id="form-content">
+                @include('group_category')
+                @include('teacher_category')
+                @include('room_category')
             </div>
-            <div class="col">
-                <div class="card mb-4 rounded-3 shadow-sm">
-                    <div class="card-header py-3">
-                        <h4 class="my-0 fw-normal">Расписание аудиторий</h4>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled mt-3 mb-4">
-                            <li class="fst-italic">Расписание аудиторий</li>
-                            <li class="fst-italic">по</li>
-                            <li class="fst-italic">факультетам/институтам,</li>
-                            <li class="fst-italic">кафедрам</li>
-                            <li class="fst-italic">и номерам аудиторий</li>
-                            <li class="text-white">и</li>
-                        </ul>
-                        <a class="w-100 btn btn-lg btn-primary" href="{{route('get_classrooms')}}">Перейти</a>
-                    </div>
+
+        </div>
+    </div>
+
+    <div class="container mt-3">
+        <div style="display: none;" id="result-content">
+            <div class="card tab-panel">
+                <input type="submit" class="btn btn-primary" name="download" value="Скачать">
+                <div class="row row-auto">
+                    <table class="table mt-2">
+                        <thead>
+                            <th scope="col">В разработке</th>
+                        </thead>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+
+</main>
+<footer></footer>
+<script>
+    $(function () {
+        $('input[type="submit"]').on('click', (event) => {
+            $('#result-content').show();
+            event.preventDefault();
+        });
+    });
+</script>
 @endsection

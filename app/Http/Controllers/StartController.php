@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Storage;
 
 class StartController extends Controller
 {
-    public function index(){
+    public function index()
+    {
 
-Storage::deleteDirectory('public_html/schedule');
+        Storage::deleteDirectory('public_html/schedule');
         $files = collect(Storage::allFiles('public//schedule'));
         $files->each(function ($file) {
-            $lastModified =  Storage::lastModified($file);
+            $lastModified = Storage::lastModified($file);
             $lastModified = Carbon::parse($lastModified);
 
             if (Carbon::now()->gt($lastModified->addHour(12))) {
