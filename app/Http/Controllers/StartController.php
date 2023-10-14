@@ -9,6 +9,8 @@ use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Services\GetFromDatabase\GetFaculties;
+use App\Models\Group;
 
 class StartController extends Controller
 {
@@ -25,7 +27,12 @@ class StartController extends Controller
                 Storage::delete($file);
             }
         });
-
-        return view('main_page');
+        $faculties = GetFaculties::facultiesToGroups();
+        $courses = [];
+        $groups = Group::all();
+        $faculty_id = 0;
+        $group_id = 0;
+        $courseName = 0;
+        return view('main_page', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
     }
 }

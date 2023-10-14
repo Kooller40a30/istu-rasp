@@ -3,6 +3,7 @@
     <h5 class="card-header">Расписание по аудиториям</h5>
     <div class="card-body">
         <form method="post" action="http://istu-rasp/classrooms_faculty" id="faculties">
+            @csrf
             <div class="row">
                 <label for="faculty" class="form-label">Выберите институт/факультет</label>
                 <select class="form-select mb-3" name="faculty" id="faculty">
@@ -36,4 +37,4 @@
         </form>
     </div>
 </div>
-@endsection
+@show
