@@ -1,0 +1,51 @@
+.card.tab-pane.fade label {
+    font-size: 20px;
+    font-weight: 600;
+}
+.site-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 1000px;
+   background: #164ACF url(https://istu.ru/images/header_back.png?65c762bc6ffefd9be87b3fa7eab5ff60) top;
+   background-position-y: 23px;
+   color: #FFF;
+}
+.logo {
+    display: block;
+    width: 148px;
+    height: 140px;
+    background: url(https://istu.ru/images/svg/istu-logo.svg) no-repeat;
+    background-size: cover;
+}
+.navbar{
+    background-color: #e6e6e6;
+    display: flex;
+    flex-direction: row-reverse;
+    padding-right: 15px;
+}
+.name-university{   
+    text-decoration: none;
+    font: 16px "Open Sans", sans-serif;
+    color: #FFF;
+    margin: 5px 10px;
+}
+.support-container{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.container-fluid {
+    display: flex;
+}
+.link-animation:hover {
+    position: relative;
+    color:#666;
+    text-decoration: underline;
+}
+.link-animation {
+    position: relative;
+    color:#666;
+    transition: all 0.5s;
+    text-decoration: none;
+}
+
