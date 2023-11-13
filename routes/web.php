@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClassroomsController;
+use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\DownloadClassroomsController;
 use App\Http\Controllers\DownloadDepartmentsController;
 use App\Http\Controllers\DownloadFacultiesController;
@@ -11,7 +12,9 @@ use App\Http\Controllers\ErrorsController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\StartController;
 use App\Http\Controllers\TeachersController;
+use App\Services\GetFromDatabase\GetGroups;
 use Illuminate\Support\Facades\Route;
+use Psy\Util\Json;
 
 /*
 |--------------------------------------------------------------------------
@@ -140,6 +143,10 @@ Route::get('/groups', [GroupsController::class, 'getAllGroups'])->name('get_grou
 Route::post('/groups_faculty', [GroupsController::class, 'getFacultyGroups'])->name('groups_faculty');
 Route::post('/groups_course', [GroupsController::class, 'getCourse'])->name('groups_course');
 Route::post('/groups_group', [GroupsController::class, 'getGroup'])->name('groups_group');
+Route::get('/groups/{faculty?}/{course?}', [GroupsController::class, 'getGroups'])->name('getGroups');
+
+// курс обучения
+Route::get('/courses/{faculty?}', [CoursesController::class, 'getCourses'])->name('getCourses');
 
 //загрузка файлов
 //аудитории

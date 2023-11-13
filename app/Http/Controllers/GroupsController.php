@@ -2,22 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\CreateExcel\CreateExcelFiles;
 use App\CreateExcel\CreateGroups;
 use App\Http\Requests\CourseRequest;
-use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
 use App\Http\Requests\GroupRequest;
-use App\Http\Requests\TeacherRequest;
-use App\Models\Classroom;
-use App\Models\Department;
-use App\Models\DepartmentTeacher;
 use App\Models\Faculty;
 use App\Models\Group;
 use App\Services\GetFromDatabase\GetFaculties;
 use App\Services\GetFromDatabase\GetGroups;
 use App\Services\GetFromDatabase\GetGroupsCourses;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Psy\Util\Json;
 
 class GroupsController extends Controller
 {
@@ -37,19 +32,19 @@ class GroupsController extends Controller
         $courseName = 0;
         return view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
     }
-    public function getFacultyGroups(FacultyRequest $request)
-    {
-        set_time_limit(0);
-        $faculty_id = $request['faculty'];
-        if (isset($_POST['courses'])) {
-            $faculties = GetFaculties::facultiesToGroups();
-            $courses = GetGroupsCourses::courses($faculty_id);
-            $groups = GetGroups::groups($faculty_id);
-            $group_id = 0;
-            $courseName = 0;
-            return response()->view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
-        }
-    }
+    // public function getFacultyGroups(FacultyRequest $request)
+    // {
+    //     set_time_limit(0);
+    //     $faculty_id = $request['faculty'];
+    //     if (isset($_POST['courses'])) {
+    //         $faculties = GetFaculties::facultiesToGroups();
+    //         $courses = GetGroupsCourses::courses($faculty_id);
+    //         $groups = GetGroups::groups($faculty_id);
+    //         $group_id = 0;
+    //         $courseName = 0;
+    //         return response()->view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
+    //     }
+    // }
 
     public function getCourse(CourseRequest $request)
     {
@@ -88,5 +83,22 @@ class GroupsController extends Controller
             $title = 'Расписание группы ' . $groupName;
             return response()->view('groups_schedule_table', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'html', 'title'));
         }
+    }
+
+    public function getGroups(Request $request)
+    {
+        $matches = [];
+        preg_match('/\d+/ui', $request['faculty'], $matches);
+        $faculty_id = key_exists(0, $matches) ? $matches[0] : 0;
+        preg_match('/\d+/ui', $request['course'], $matches);
+        $course = key_exists(0, $matches) ? $matches[0] : 0;
+        $groups = GetGroups::groups($faculty_id, $course);
+        $list = '<option selected="" value="">Все</option>';
+        foreach ($groups as $group) {
+            $id = $group['id'];
+            $name = $group['nameGroup'];
+            $list .= "<option value=\"$id\">$name</option>";
+        }
+        return response($list);
     }
 }

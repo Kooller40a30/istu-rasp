@@ -2,23 +2,38 @@
 
 namespace App\Services\GetFromDatabase;
 
-use App\Models\Classroom;
-use App\Models\Faculty;
 use App\Models\Group;
-use App\Models\Teacher;
 
-class GetGroups{
-
-    public static function groups($faculty_id,$course = null)
+class GetGroups 
+{
+    /**
+     * Перечень групп
+     *
+     * @param integer $faculty факультет
+     * @param integer $course курс
+     * @return array
+     */
+    public static function groups(int $faculty, int $course)
     {
-        if ($course != null){
-            $groups = Group::where('faculty_id', $faculty_id)
-                ->where('course', $course)
-                ->get();
-        } else {
-            $groups = Group::where('faculty_id', $faculty_id)
-                ->get();
+        $builder = Group::select('id', 'nameGroup')
+            ->where("faculty_id", $faculty);
+        if ($course > 0) {
+            $builder->where("course_id", $course);
         }
-        return $groups;
+        return $builder->get();
+    }
+
+    /**
+     * Перечень курсов
+     *
+     * @param integer $faculty факультет
+     * @return array
+     */
+    public static function courses(int $faculty) 
+    {
+        return Group::select('distinct course')
+            ->where('faculty_id', $faculty)
+            ->orderBy('course')
+            ->get();
     }
 }

@@ -6,17 +6,14 @@
             @csrf
             <div class="row">
                 <label for="faculty" class="form-label">Выберите институт/факультет</label>
-                <select class="form-select mb-3" name="faculty" id="faculty">
-                    <option disabled="" selected="">Выберите институт/факультет
-                    </option>
-                    <option value="4">Институт «Информатика и вычислительная
-                        техника»</option>
+                <select class="form-select mb-3" name="faculty" id="room_faculty">
+                    <option disabled="" selected="">Выберите институт/факультет</option>                    
                 </select>
             </div>
 
             <div class="row">
                 <label class="form-label">Выберите кафедру</label>
-                <select class="form-select mb-3" name="department" id="department">
+                <select class="form-select mb-3" name="department" id="room_department">
                     <option disabled="" selected="">Выберите кафедру</option>
                     <option value="34.4">Автоматизированные системы обработки
                         информации и управления (АСОИУ)</option>

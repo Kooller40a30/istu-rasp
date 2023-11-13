@@ -22,6 +22,28 @@
             $('#result-content').show();
             event.preventDefault();
         });
+
+        $('#group_faculty').on('change', (event) => {
+            $.ajax({
+                url: '/courses/faculty=' + $(event.target).val(),
+                success: (courses) => {
+                    $('#course-dropdown').html(courses);
+                    $('#course-dropdown').val("");
+                }
+            });
+        });
+
+        $('#course-dropdown').on('change', (event) => {
+            var faculty_id = $('#group_faculty').val();
+            var course = $(event.target).val();
+            $.ajax({
+                url: '/groups/faculty=' + faculty_id + '/course=' + course,
+                success: (groups) => {                    
+                    $('#group-dropdown').html(groups);
+                    $('#group-dropdown').val("");
+                }
+            });            
+        });
     });
 </script>
 </body>

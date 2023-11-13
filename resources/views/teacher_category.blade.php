@@ -6,7 +6,7 @@
             @csrf
             <div class="row">
                 <label for="teacher" class="form-label">Выберите институт/факультет</label>
-                <select class="form-select mb-3" name="faculty" id="faculty">
+                <select class="form-select mb-3" name="faculty" id="teacher_faculty">
                     <option disabled="" selected="">Выберите институт/факультет
                     </option>
                 </select>
