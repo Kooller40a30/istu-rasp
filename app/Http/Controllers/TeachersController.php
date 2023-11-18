@@ -106,7 +106,7 @@ class TeachersController extends Controller
         $faculty_id = (int)$request->query('faculty');
         $dep_id = (int)$request->query('dep');
         $teachers = GetTeachers::teachers($faculty_id, $dep_id);
-        $html = '<option value="">Все</option>';
+        $html = '<option value="">Все преподаватели</option>';
         foreach ($teachers as $teacher) {
             $id = $teacher['id'];
             $name = $teacher['nameTeacher'];

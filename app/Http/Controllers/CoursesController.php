@@ -11,7 +11,7 @@ class CoursesController extends Controller
     {
         $faculty = (int)$request->query('faculty');
         $courses = CoursesRepository::findAll($faculty);
-        $list = '<option value="">Все</option>';
+        $list = '<option value="">Все курсы</option>';
         foreach ($courses as $course) {
             $id = $course['id'];
             $name = $course['nameCourse'];

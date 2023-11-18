@@ -87,7 +87,7 @@ class GroupsController extends Controller
         $faculty_id = (int)$request->query('faculty');
         $course = (int)$request->query('course', 0);        
         $groups = GetGroups::groups($faculty_id, $course);
-        $html = '<option selected="" value="">Все</option>';
+        $html = '<option selected="" value="">Все группы</option>';
         foreach ($groups as $group) {
             $id = $group['id'];
             $name = $group['nameGroup'];

@@ -112,7 +112,7 @@ class ClassroomsController extends Controller
         $faculty_id = (int)$request->query('faculty', 0);
         $dep_id = (int)$request->query('dep', 0);
         $classrooms = GetClassrooms::classrooms($faculty_id, $dep_id);
-        $html = '<option value="">Все</option>';
+        $html = '<option value="">Все аудитории</option>';
         foreach ($classrooms as $room) {
             $id = $room['id'];
             $name = $room['numberClassroom'];

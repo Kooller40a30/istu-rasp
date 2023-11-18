@@ -12,7 +12,7 @@ class DepartmentController extends Controller
     {
         $faculty = (int)$request->query('faculty');
         $deps = GetDepartments::teachersDepartments($faculty);
-        $html = '<option value="">Все</option>';
+        $html = '<option value="">Все кафедры</option>';
         foreach ($deps as $dep) {
             $id = $dep['id'];
             $nameDep = $dep['nameDepartment'];
