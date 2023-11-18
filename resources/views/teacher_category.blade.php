@@ -9,12 +9,18 @@
                 <select class="form-select mb-3" name="faculty" id="teacher_faculty">
                     <option disabled="" selected="">Выберите институт/факультет
                     </option>
+                    @foreach($faculties as $faculty)
+                        @if($faculty_id != 0 && $faculty_id == $faculty['id'])
+                            <option selected value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
+                        @else <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
+                        @endif
+                    @endforeach
                 </select>
             </div>
 
             <div class="row">
                 <label for="department" class="form-label">Выберите кафедру</label>
-                <select class="form-select mb-3" name="department">
+                <select class="form-select mb-3" name="department" id="department">
                     <option disabled="" selected="">Выберите кафедру</option>
                 </select>
             </div>

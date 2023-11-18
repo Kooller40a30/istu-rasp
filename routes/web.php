@@ -14,6 +14,7 @@ use App\Http\Controllers\StartController;
 use App\Http\Controllers\TeachersController;
 use App\Services\GetFromDatabase\GetGroups;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DepartmentController;
 use Psy\Util\Json;
 
 /*
@@ -127,26 +128,33 @@ Route::get('/', [StartController::class, 'index'])->name('start');
 Route::get('/errors', [ErrorsController::class, 'index'])->name('errors');
 
 //расписание преподавателей
-Route::get('/teachers', [TeachersController::class, 'getAllTeachers'])->name('get_teachers');
+// Route::get('/teachers', [TeachersController::class, 'getAllTeachers'])->name('get_teachers');
 Route::post('/teachers_faculty', [TeachersController::class, 'getFacultyTeachers'])->name('teachers_faculty');
 Route::post('/teachers_department', [TeachersController::class, 'getDepartmentTeachers'])->name('teachers_department');
 Route::post('/teachers_teacher', [TeachersController::class, 'getTeacher'])->name('teachers_teacher');
 
 //расписание аудиторий
-Route::get('/classrooms', [ClassroomsController::class, 'getAllClassrooms'])->name('get_classrooms');
+// Route::get('/classrooms', [ClassroomsController::class, 'getAllClassrooms'])->name('get_classrooms');
 Route::post('/classrooms_faculty', [ClassroomsController::class, 'getFacultyClassrooms'])->name('classrooms_faculty');
 Route::post('/classrooms_department', [ClassroomsController::class, 'getDepartmentClassrooms'])->name('classrooms_department');
 Route::post('/classrooms_classroom', [ClassroomsController::class, 'getClassroom'])->name('classrooms_classroom');
+Route::get('/classrooms', [ClassroomsController::class, 'getClassrooms'])->name('getClassrooms');
 
 //расписание групп
-Route::get('/groups', [GroupsController::class, 'getAllGroups'])->name('get_groups');
+// Route::get('/groups', [GroupsController::class, 'getAllGroups'])->name('get_groups');
 Route::post('/groups_faculty', [GroupsController::class, 'getFacultyGroups'])->name('groups_faculty');
 Route::post('/groups_course', [GroupsController::class, 'getCourse'])->name('groups_course');
 Route::post('/groups_group', [GroupsController::class, 'getGroup'])->name('groups_group');
-Route::get('/groups/{faculty?}/{course?}', [GroupsController::class, 'getGroups'])->name('getGroups');
+Route::get('/groups', [GroupsController::class, 'getGroups'])->name('getGroups');
 
 // курс обучения
-Route::get('/courses/{faculty?}', [CoursesController::class, 'getCourses'])->name('getCourses');
+Route::get('/courses', [CoursesController::class, 'getCourses'])->name('getCourses');
+
+// кафедры
+Route::get('/departments', [DepartmentController::class, 'getDepartments'])->name('getDepartments');
+
+// преподаватели
+Route::get('/teachers', [TeachersController::class, 'getTeachers'])->name('getTeachers');
 
 //загрузка файлов
 //аудитории

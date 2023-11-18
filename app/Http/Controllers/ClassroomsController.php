@@ -25,7 +25,7 @@ class ClassroomsController extends Controller
         //Storage::createDirectory('public/schedule');
         $faculties = GetFaculties::facultiesToClassrooms();
         $departments = GetDepartments::classroomsDepartments();
-        $classrooms = GetClassrooms::classrooms(null);
+        $classrooms = GetClassrooms::classrooms();
         $faculty_id = -1;
         $department_id = -1;
         $classroom_id = -1;
@@ -105,5 +105,19 @@ class ClassroomsController extends Controller
             $title = 'Расписание аудитории ' . $classroomName;
             return view('classrooms_schedule_table',compact('faculties','departments','classrooms','faculty_id','department_id','classroom_id','html','title'));
         }
+    }
+
+    public function getClassrooms(Request $request)
+    {
+        $faculty_id = (int)$request->query('faculty', 0);
+        $dep_id = (int)$request->query('dep', 0);
+        $classrooms = GetClassrooms::classrooms($faculty_id, $dep_id);
+        $html = '<option value="">Все</option>';
+        foreach ($classrooms as $room) {
+            $id = $room['id'];
+            $name = $room['numberClassroom'];
+            $html .= "<option value=\"$id\">$name</option>";
+        }
+        return response($html);
     }
 }

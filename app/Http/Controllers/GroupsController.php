@@ -21,10 +21,7 @@ class GroupsController extends Controller
     {
         //Storage::deleteDirectory('public/schedule');
         //Storage::createDirectory('public/schedule');
-        $faculties = GetFaculties::facultiesToGroups();
-        echo '<pre>';
-        var_dump($faculties);
-        echo '</pre>';
+        $faculties = GetFaculties::facultiesToGroups();        
         $courses = null;
         $groups = Group::all();
         $faculty_id = 0;
@@ -87,18 +84,15 @@ class GroupsController extends Controller
 
     public function getGroups(Request $request)
     {
-        $matches = [];
-        preg_match('/\d+/ui', $request['faculty'], $matches);
-        $faculty_id = key_exists(0, $matches) ? $matches[0] : 0;
-        preg_match('/\d+/ui', $request['course'], $matches);
-        $course = key_exists(0, $matches) ? $matches[0] : 0;
+        $faculty_id = (int)$request->query('faculty');
+        $course = (int)$request->query('course', 0);        
         $groups = GetGroups::groups($faculty_id, $course);
-        $list = '<option selected="" value="">Все</option>';
+        $html = '<option selected="" value="">Все</option>';
         foreach ($groups as $group) {
             $id = $group['id'];
             $name = $group['nameGroup'];
-            $list .= "<option value=\"$id\">$name</option>";
+            $html .= "<option value=\"$id\">$name</option>";
         }
-        return response($list);
+        return response($html);
     }
 }

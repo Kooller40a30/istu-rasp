@@ -16,35 +16,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-<script>
-    $(function () {
-        $('input[type="submit"]').on('click', (event) => {
-            $('#result-content').show();
-            event.preventDefault();
-        });
-
-        $('#group_faculty').on('change', (event) => {
-            $.ajax({
-                url: '/courses/faculty=' + $(event.target).val(),
-                success: (courses) => {
-                    $('#course-dropdown').html(courses);
-                    $('#course-dropdown').val("");
-                }
-            });
-        });
-
-        $('#course-dropdown').on('change', (event) => {
-            var faculty_id = $('#group_faculty').val();
-            var course = $(event.target).val();
-            $.ajax({
-                url: '/groups/faculty=' + faculty_id + '/course=' + course,
-                success: (groups) => {                    
-                    $('#group-dropdown').html(groups);
-                    $('#group-dropdown').val("");
-                }
-            });            
-        });
-    });
-</script>
+<script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

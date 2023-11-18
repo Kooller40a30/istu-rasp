@@ -9,10 +9,12 @@ class CoursesRepository
 {
     public static function findAll(int $faculty = 0) 
     {
-        return Course::select('course.*')
-            ->join('groups', 'groups.course_id', '=', 'course.id')
-            ->where('groups.faculty_id', $faculty)
-            ->groupBy('course.id')
-            ->get();
+        $model = Course::select('course.*')
+            ->join('groups', 'groups.course_id', '=', 'course.id')            
+            ->groupBy('course.id');            
+            if ($faculty) {
+                $model->where('groups.faculty_id', $faculty);
+            }
+        return $model->get();
     }
 }

@@ -9,10 +9,9 @@ class CoursesController extends Controller
 {
     public function getCourses(Request $request)
     {
-        $matches = [];
-        preg_match('/\d+/ui', $request['faculty'], $matches);
-        $courses = CoursesRepository::findAll($matches[0] ?? 0);
-        $list = '';
+        $faculty = (int)$request->query('faculty');
+        $courses = CoursesRepository::findAll($faculty);
+        $list = '<option value="">Все</option>';
         foreach ($courses as $course) {
             $id = $course['id'];
             $name = $course['nameCourse'];

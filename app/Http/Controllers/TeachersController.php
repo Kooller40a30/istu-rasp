@@ -100,4 +100,18 @@ class TeachersController extends Controller
             return view('teachers_schedule_table',compact('faculties','departments','teachers','faculty_id','department_id','teacher_id','html','title'));
         }
     }
+
+    public function getTeachers(Request $request)
+    {
+        $faculty_id = (int)$request->query('faculty');
+        $dep_id = (int)$request->query('dep');
+        $teachers = GetTeachers::teachers($faculty_id, $dep_id);
+        $html = '<option value="">Все</option>';
+        foreach ($teachers as $teacher) {
+            $id = $teacher['id'];
+            $name = $teacher['nameTeacher'];
+            $html .= "<option value=\"$id\">$name</option>";
+        }
+        return response($html);
+    }
 }
