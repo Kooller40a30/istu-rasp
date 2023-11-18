@@ -36,9 +36,7 @@
                 @include('room_category')
             </div>
 
-            <div class="col-12">
-                @include('result_schedule')    
-            </div>
+            <div class="col-12" id="result-schedule"></div>
 
         </div>
     </div>        

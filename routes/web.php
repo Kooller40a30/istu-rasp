@@ -124,6 +124,10 @@ Route::get('/table_faculty_classrooms', [CreateTableController::class, 'createFa
 //главная страница
 Route::get('/', [StartController::class, 'index'])->name('start');
 
+Route::get('/groups_schedule', [GroupsController::class, 'loadGroupSchedule'])->name('groups_schedule');
+// Route::post('/', [TeachersController::class, 'loadTeacherSchedule'])->name('teachers_schedule');
+// Route::post('/', [ClassroomsController::class, 'loadClassroomSchedule'])->name('classrooms_schedule');
+
 //ошибки
 Route::get('/errors', [ErrorsController::class, 'index'])->name('errors');
 

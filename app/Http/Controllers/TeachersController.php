@@ -114,4 +114,9 @@ class TeachersController extends Controller
         }
         return response($html);
     }
+
+    public function loadTeacherSchedule(TeacherRequest $request)
+    {
+        
+    }
 }

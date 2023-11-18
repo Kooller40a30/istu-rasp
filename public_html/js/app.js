@@ -1,14 +1,10 @@
 $(function () {
     $('input[type="submit"]').on('click', (event) => {
-        var listData = [];
-        var dropdowns = $(event.target).parents('form').find('select');
-        for (var select of dropdowns) {
-            listData.push(select.options[select.selectedIndex].text);
-        }
-        
-        console.log(listData);
-        $('#result-content').show();
-        $('#title-schedule').html(listData.join("<br>"));
+        var data = $(event.target).parents('form').serializeArray();
+        $.get('/groups_schedule', data, (html, xhr) => {
+            $('#result-schedule').html(html);
+            console.log(xhr);
+        });
         event.preventDefault();
     });
 

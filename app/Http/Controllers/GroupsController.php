@@ -29,19 +29,6 @@ class GroupsController extends Controller
         $courseName = 0;
         return view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
     }
-    // public function getFacultyGroups(FacultyRequest $request)
-    // {
-    //     set_time_limit(0);
-    //     $faculty_id = $request['faculty'];
-    //     if (isset($_POST['courses'])) {
-    //         $faculties = GetFaculties::facultiesToGroups();
-    //         $courses = GetGroupsCourses::courses($faculty_id);
-    //         $groups = GetGroups::groups($faculty_id);
-    //         $group_id = 0;
-    //         $courseName = 0;
-    //         return response()->view('groups_schedule', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
-    //     }
-    // }
 
     public function getCourse(CourseRequest $request)
     {
@@ -94,5 +81,13 @@ class GroupsController extends Controller
             $html .= "<option value=\"$id\">$name</option>";
         }
         return response($html);
+    }
+    
+    public function loadGroupSchedule(GroupRequest $request) 
+    {
+        return '12321';
+        // dd($request);
+        // $result = '';
+        // return response()->view('result_schedule', compact($result));
     }
 }

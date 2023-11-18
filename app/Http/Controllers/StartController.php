@@ -15,7 +15,7 @@ use App\Services\GetFromDatabase\GetGroupsCourses;
 
 class StartController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
 
         Storage::deleteDirectory('public_html/schedule');
@@ -28,12 +28,13 @@ class StartController extends Controller
                 Storage::delete($file);
             }
         });
-        $faculty_id = 0;
-        $group_id = 0;
-        $courseName = 0;
+        $faculty_id = $request->input('faculty', 0);
+        $group_id = $request->input('group', 0);
+        $courseName = $request->input('course', "");
         $faculties = GetFaculties::facultiesToGroups();
         $courses = GetGroupsCourses::courses($faculty_id);
         $groups = [];
-        return view('main_page', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName'));
+        $result = "";
+        return view('main_page', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'result'));
     }
 }

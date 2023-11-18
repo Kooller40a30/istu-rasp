@@ -2,7 +2,7 @@
 <div class="card tab-pane fade" id="room-tab-pane" role="tabpanel" aria-labelledby="room-tab" tabindex="-1">
     <h5 class="card-header">Расписание по аудиториям</h5>
     <div class="card-body">
-        <form method="post" action="http://istu-rasp/classrooms_faculty" id="faculties">
+        <form method="post" action="http://istu-rasp/classrooms_faculty">
             @csrf
             <div class="row">
                 <label for="faculty" class="form-label">Выберите институт/факультет</label>

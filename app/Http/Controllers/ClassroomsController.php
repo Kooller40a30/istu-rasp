@@ -120,4 +120,9 @@ class ClassroomsController extends Controller
         }
         return response($html);
     }
+
+    public function loadClassroomSchedule(ClassroomRequest $request) 
+    {
+        
+    }
 }
