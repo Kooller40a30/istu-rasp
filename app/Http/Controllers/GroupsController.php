@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateGroups;
+use App\Helpers\ScheduleHelper;
 use App\Http\Requests\CourseRequest;
 use App\Http\Requests\FacultyRequest;
 use App\Http\Requests\GroupRequest;
 use App\Models\Faculty;
 use App\Models\Group;
+use App\Services\GetFromDatabase\CoursesRepository;
 use App\Services\GetFromDatabase\GetFaculties;
 use App\Services\GetFromDatabase\GetGroups;
 use App\Services\GetFromDatabase\GetGroupsCourses;
@@ -83,11 +85,22 @@ class GroupsController extends Controller
         return response($html);
     }
     
-    public function loadGroupSchedule(GroupRequest $request) 
+    public function loadGroupSchedule(Request $request) 
     {
-        return '12321';
-        // dd($request);
-        // $result = '';
-        // return response()->view('result_schedule', compact($result));
+        $attrs = $request->all(['faculty', 'course', 'group']);        
+        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
+        $course = CoursesRepository::findOne((int)$request->query('course', 0));
+        $group = Group::where('id', '=', $request->query('group', 0))->first();
+        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
+        $courseName = $course['nameCourse'] ?? 'Все курсы';
+        $groupName = $group['nameGroup'] ?? 'Все группы';
+        $header = "Институт: {$facultyName}<br>Курс: {$courseName}<br>Группа: {$groupName}";
+        if ($group) {
+            $result = ScheduleHelper::generateGroupSchedule($group);
+        } else {
+            $result = ScheduleHelper::generateCourseSchedule($faculty, $course);
+        }
+        
+        return response()->view('result_schedule', compact('result', 'header'));
     }
 }

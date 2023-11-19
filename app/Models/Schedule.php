@@ -22,4 +22,9 @@ class Schedule extends Model
     public function getGroup(){
         return $this->belongsTo(Group::class,'group_id','id');
     }
+
+    public function getClass()
+    {
+        return $this->belongsTo(ClassModel::class, 'class', 'id');
+    }
 }

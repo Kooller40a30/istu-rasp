@@ -7,6 +7,12 @@ use App\Models\Course;
 
 class CoursesRepository 
 {
+
+    public static function findOne(int $id)
+    {
+        return Course::where('id', '=', $id)->first();
+    }
+
     public static function findAll(int $faculty = 0) 
     {
         $model = Course::select('course.*')
