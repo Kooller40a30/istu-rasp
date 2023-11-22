@@ -1,9 +1,10 @@
 $(function () {
     $('input[type="submit"]').on('click', (event) => {
+        console.log($(event.target).parents('form'));
         var data = $(event.target).parents('form').serializeArray();
+        console.log(data);
         $.get('/groups_schedule', data, (html, xhr) => {
             $('#result-schedule').html(html);
-            console.log(xhr);
         });
         event.preventDefault();
     });

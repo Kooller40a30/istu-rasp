@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateExcelFiles;
+use App\Helpers\ScheduleHelper;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
 use App\Http\Requests\TeacherRequest;
@@ -115,8 +116,20 @@ class TeachersController extends Controller
         return response($html);
     }
 
-    public function loadTeacherSchedule(TeacherRequest $request)
+    public function loadTeacherSchedule(Request $request)
     {
-        
+        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
+        $dep = Department::where('id', '=', (int)$request->query('department', 0))->first();
+        $teacher = Teacher::where('id', '=', (int)$request->query('teacher', 0))->first();
+        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
+        $depName = $course['nameDepartment'] ?? 'Все кафедры';
+        $teacherName = $group['nameTeacher'] ?? 'Все преподаватели';
+        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
+        if ($teacher) {
+            $result = ScheduleHelper::generateTeacherSchedule($teacher);
+        } else {
+            $result = ScheduleHelper::generateTeachersSchedule($faculty, $dep);
+        }
+        return response()->view('result_schedule', compact('result', 'header'));
     }
 }

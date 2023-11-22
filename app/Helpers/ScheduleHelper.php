@@ -4,15 +4,19 @@ namespace App\Helpers;
 
 use App\Models\ClassModel;
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Group;
 use App\Models\Schedule;
+use App\Models\Teacher;
 use App\Services\GetFromDatabase\ScheduleRepository;
 
 class ScheduleHelper 
 {
     const FIRST_WEEK = 1;
     const SECOND_WEEK = 2;
+
+    public static $days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
     public static function generateGroupSchedule(Group $group, bool $compress = false) : string
     {
@@ -98,5 +102,27 @@ class ScheduleHelper
             case 6: return 'Сб';
             default: return 'Вс';
         }
+    }
+
+    public static function generateTeacherSchedule(Teacher $teacher) : string
+    {
+        $html = self::createHeaderTableTeacher($teacher);
+
+        return $html;
+    }
+
+    public static function createHeaderTableTeacher(Teacher $teacher) 
+    {
+        $name = $teacher['nameTeacher'];
+        $html = "<tr><td rowspan=\"2\">$name</td>";
+        foreach (self::$days as $day) {
+            $html .= "<td>$day</td>";
+        }
+        return $html . '</tr>';
+    }
+
+    public static function generateTeachersSchedule(Faculty $faculty, Department $department) : string
+    {
+
     }
 }

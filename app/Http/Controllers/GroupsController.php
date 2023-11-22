@@ -87,7 +87,6 @@ class GroupsController extends Controller
     
     public function loadGroupSchedule(Request $request) 
     {
-        $attrs = $request->all(['faculty', 'course', 'group']);        
         $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
         $course = CoursesRepository::findOne((int)$request->query('course', 0));
         $group = Group::where('id', '=', $request->query('group', 0))->first();
