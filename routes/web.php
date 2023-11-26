@@ -136,13 +136,15 @@ Route::get('/errors', [ErrorsController::class, 'index'])->name('errors');
 Route::post('/teachers_faculty', [TeachersController::class, 'getFacultyTeachers'])->name('teachers_faculty');
 Route::post('/teachers_department', [TeachersController::class, 'getDepartmentTeachers'])->name('teachers_department');
 Route::post('/teachers_teacher', [TeachersController::class, 'getTeacher'])->name('teachers_teacher');
+Route::get('/teacher_schedule', [TeachersController::class, 'loadTeacherSchedule'])->name('teacher_schedule');
 
 //расписание аудиторий
-// Route::get('/classrooms', [ClassroomsController::class, 'getAllClassrooms'])->name('get_classrooms');
+Route::get('/classroom', [ClassroomsController::class, 'getAllClassrooms'])->name('get_classrooms');
 Route::post('/classrooms_faculty', [ClassroomsController::class, 'getFacultyClassrooms'])->name('classrooms_faculty');
 Route::post('/classrooms_department', [ClassroomsController::class, 'getDepartmentClassrooms'])->name('classrooms_department');
 Route::post('/classrooms_classroom', [ClassroomsController::class, 'getClassroom'])->name('classrooms_classroom');
 Route::get('/classrooms', [ClassroomsController::class, 'getClassrooms'])->name('getClassrooms');
+Route::get('/classroom_schedule', [ClassroomsController::class, 'loadClassroomSchedule'])->name('classroom_schedule');
 
 //расписание групп
 // Route::get('/groups', [GroupsController::class, 'getAllGroups'])->name('get_groups');

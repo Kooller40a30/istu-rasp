@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateExcelFiles;
+use App\Helpers\ClassroomScheduleHelper;
+use App\Helpers\TeacherScheduleHelper;
 use App\Http\Requests\ClassroomRequest;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
@@ -121,8 +123,20 @@ class ClassroomsController extends Controller
         return response($html);
     }
 
-    public function loadClassroomSchedule(ClassroomRequest $request) 
+    public function loadClassroomSchedule(Request $request) 
     {
-        
+        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
+        $dep = Department::where('id', '=', (int)$request->query('department', 0))->first();
+        $classroom = Classroom::where('id', '=', (int)$request->query('classroom', 0))->first();
+        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
+        $depName = $dep['nameDepartment'] ?? 'Все кафедры';
+        $classroomName = $classroom['numberClassroom'] ?? 'Все аудитории';
+        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Аудитория: {$classroomName}";
+        if ($classroom) {
+            $result = ClassroomScheduleHelper::generateSchedule($classroom->schedules(), $classroomName, true);
+        } else {
+            $result = ClassroomScheduleHelper::generateSchedules($faculty, $dep);
+        }
+        return response()->view('result_schedule', compact('result', 'header'));
     }
 }

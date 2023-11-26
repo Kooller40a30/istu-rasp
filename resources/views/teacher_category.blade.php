@@ -31,7 +31,7 @@
             </div>
 
             <div class="row">
-                <input type="submit" class="btn btn-primary" name="show" value="Показать">
+                <input type="submit" class="btn btn-primary" name="show" value="Показать" id="btn-teacher">
             </div>
         </form>
     </div>

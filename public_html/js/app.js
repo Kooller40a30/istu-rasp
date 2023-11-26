@@ -1,9 +1,23 @@
 $(function () {
-    $('input[type="submit"]').on('click', (event) => {
-        console.log($(event.target).parents('form'));
+    $('#btn-group').on('click', (event) => {
         var data = $(event.target).parents('form').serializeArray();
-        console.log(data);
         $.get('/groups_schedule', data, (html, xhr) => {
+            $('#result-schedule').html(html);
+        });
+        event.preventDefault();
+    });
+
+    $('#btn-teacher').on('click', (event) => {
+        var data = $(event.target).parents('form').serializeArray();
+        $.get('/teacher_schedule', data, (html, xhr) => {
+            $('#result-schedule').html(html);
+        });
+        event.preventDefault();
+    });
+
+    $('#btn-room').on('click', (event) => {
+        var data = $(event.target).parents('form').serializeArray();
+        $.get('/classroom_schedule', data, (html, xhr) => {
             $('#result-schedule').html(html);
         });
         event.preventDefault();

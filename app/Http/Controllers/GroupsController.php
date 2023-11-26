@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateGroups;
+use App\Helpers\GroupScheduleHelper;
 use App\Helpers\ScheduleHelper;
 use App\Http\Requests\CourseRequest;
 use App\Http\Requests\FacultyRequest;
@@ -95,9 +96,9 @@ class GroupsController extends Controller
         $groupName = $group['nameGroup'] ?? 'Все группы';
         $header = "Институт: {$facultyName}<br>Курс: {$courseName}<br>Группа: {$groupName}";
         if ($group) {
-            $result = ScheduleHelper::generateGroupSchedule($group);
+            $result = GroupScheduleHelper::generateSchedule($group->schedules(), $groupName);
         } else {
-            $result = ScheduleHelper::generateCourseSchedule($faculty, $course);
+            $result = GroupScheduleHelper::generateCourseSchedule($faculty, $course);
         }
         
         return response()->view('result_schedule', compact('result', 'header'));

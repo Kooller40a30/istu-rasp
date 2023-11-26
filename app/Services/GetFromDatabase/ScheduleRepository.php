@@ -2,19 +2,18 @@
 
 namespace App\Services\GetFromDatabase;
 
-use App\Models\Group;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ScheduleRepository 
 {
-    public static function findSchedules(Group $group, int $week) 
+    public static function sortSchedules(HasMany $relation, int $week)
     {
-        return $group->schedules()
-            ->select('class', 'week', 'day', 'content')
+        return $relation->select('class', 'week', 'day', 'content', 'group_id')
             ->orderBy('class')
             ->orderBy('week')
             ->orderBy('day')
             ->where('week', '=', $week)
-            ->groupBy('class', 'week', 'day', 'content')
+            ->groupBy('class', 'week', 'day', 'content', 'group_id')
             ->get();
     }
 }

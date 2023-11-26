@@ -3,13 +3,9 @@
 namespace App\Helpers;
 
 use App\Models\ClassModel;
-use App\Models\Course;
-use App\Models\Department;
-use App\Models\Faculty;
-use App\Models\Group;
 use App\Models\Schedule;
-use App\Models\Teacher;
 use App\Services\GetFromDatabase\ScheduleRepository;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ScheduleHelper 
 {
@@ -18,39 +14,7 @@ class ScheduleHelper
 
     public static $days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-    public static function generateGroupSchedule(Group $group, bool $compress = false) : string
-    {
-        // 9 столбцов для n-го числа групп
-        // 15 строк для 1 группы
-        $firstSchedules = ScheduleRepository::findSchedules($group, self::FIRST_WEEK)->toArray();
-        $secondSchedules = ScheduleRepository::findSchedules($group, self::SECOND_WEEK)->toArray();
-        $html = self::createHeaderTable($group);
-        // dd($firstSchedules);
-        $classes = ClassModel::orderBy('id')->get();
-        foreach ($classes as $class) {
-            
-            $firstSchedule = array_filter($firstSchedules, function(array $schedule) use ($class) {
-                return $schedule['class'] === $class['id'];
-            });
-            $secondSchedule = array_filter($secondSchedules, function(array $schedule) use ($class) {
-                return $schedule['class'] === $class['id'];
-            });
-            $htmlFirstSchedule = self::createSubrowSchedule($firstSchedule);
-            $htmlSecondSchedule = self::createSubrowSchedule($secondSchedule);
-            $numLesson = $class['id'];
-            $timeLesson = $class['start_time'] . ' - ' . $class['end_time'];
-
-            $html .= "<tr>
-                <td rowspan=\"2\">$numLesson</td>
-                <td rowspan=\"2\">$timeLesson</td>
-                $htmlFirstSchedule
-            </tr>
-            <tr>$htmlSecondSchedule</tr>";
-        }
-        return $html;
-    }
-
-    protected static function createSubrowSchedule(array $schedules)
+    protected static function createSubrowSchedule($schedules, bool $showGroup = false)
     {
         $days = range(1, 6);
         $listTd = [];
@@ -60,35 +24,15 @@ class ScheduleHelper
         foreach ($schedules as $schedule) {
             if (in_array($schedule['day'], $days)) {
                 $disc = $schedule['content'];
-                $listTd[$schedule['day']] = "<td>$disc</td>";  
+                $group = "";
+                if ($showGroup) {
+                    //@todo вывести список групп
+                    $group = ", " . $schedule->getGroup['nameGroup'];
+                }
+                $listTd[$schedule['day']] = "<td>{$disc}{$group}</td>";  
             }          
         }
         return implode('', $listTd);
-    }
-
-    protected static function createHeaderTable(Group $group)
-    {
-        $nameGroup = $group['nameGroup'];
-        $week  = range(1, 6);        
-        $html = "<tr><td rowspan=\"15\" style=\"writing-mode: tb-rl;\">{$nameGroup}</td><td>Пара</td><td>Время</td>";
-        foreach ($week as $day) {
-            $html .= '<td>' . self::getDay($day) . '</td>';
-        }
-        return $html . '</tr>';
-    }
-
-    public static function generateCourseSchedule(Faculty $faculty, Course $course = null) : string
-    {
-        $html = "";
-        $groupsModel = $faculty->groups();
-        if ($course) {
-            $groupsModel->where('course_id', '=', $course['id']);
-        }
-        $groups = $groupsModel->get();
-        foreach ($groups as $group) {
-            $html .= self::generateGroupSchedule($group, true);
-        }
-        return $html;
     }
 
     public static function getDay(int $day) 
@@ -104,25 +48,40 @@ class ScheduleHelper
         }
     }
 
-    public static function generateTeacherSchedule(Teacher $teacher) : string
+    protected static function createHeaderTable(string $name) 
     {
-        $html = self::createHeaderTableTeacher($teacher);
-
-        return $html;
-    }
-
-    public static function createHeaderTableTeacher(Teacher $teacher) 
-    {
-        $name = $teacher['nameTeacher'];
-        $html = "<tr><td rowspan=\"2\">$name</td>";
+        $html = "<thead style=\"position: sticky; top: 0;\"><tr><th colspan=\"2\">$name</th>";
         foreach (self::$days as $day) {
-            $html .= "<td>$day</td>";
+            $html .= "<th>$day</th>";
         }
-        return $html . '</tr>';
+        return $html . '</tr></thead>';
     }
 
-    public static function generateTeachersSchedule(Faculty $faculty, Department $department) : string
+    public static function generateSchedule(HasMany $schedules, string $name, bool $showGroup = false) : string
     {
+        $firstSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::FIRST_WEEK)->all();
+        $secondSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::SECOND_WEEK)->all();
+        $html = self::createHeaderTable($name) . '<tbody>';        
+        $classes = ClassModel::orderBy('id')->get();
+        foreach ($classes as $class) {
+            $firstSchedule = array_filter($firstSchedules, function($schedule) use ($class) {
+                return $schedule['class'] === $class['id'];
+            });
+            $secondSchedule = array_filter($secondSchedules, function($schedule) use ($class) {
+                return $schedule['class'] === $class['id'];
+            });
+            $htmlFirstSchedule = self::createSubrowSchedule($firstSchedule, $showGroup);
+            $htmlSecondSchedule = self::createSubrowSchedule($secondSchedule, $showGroup);
+            $numLesson = $class['id'];
+            $timeLesson = $class['start_time'] . ' - ' . $class['end_time'];
 
+            $html .= "<tr>
+                <td rowspan=\"2\">$numLesson</td>
+                <td rowspan=\"2\">$timeLesson</td>
+                $htmlFirstSchedule
+            </tr>
+            <tr>$htmlSecondSchedule</tr>";
+        }
+        return $html . '</tbody>';
     }
 }
