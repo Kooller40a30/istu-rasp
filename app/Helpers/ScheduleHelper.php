@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\ClassModel;
 use App\Models\Schedule;
 use App\Services\GetFromDatabase\ScheduleRepository;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ScheduleHelper 
@@ -24,12 +25,14 @@ class ScheduleHelper
         foreach ($schedules as $schedule) {
             if (in_array($schedule['day'], $days)) {
                 $disc = $schedule['content'];
-                $group = "";
+                $groupText = "";
                 if ($showGroup) {
-                    //@todo вывести список групп
-                    $group = ", " . $schedule->getGroup['nameGroup'];
+                    $groups = $schedule->getGroups->map(function($group, $key) {
+                        return $group['nameGroup'];
+                    })->all();
+                    $groupText = $groups ? ", " . implode(', ', $groups) : "";
                 }
-                $listTd[$schedule['day']] = "<td>{$disc}{$group}</td>";  
+                $listTd[$schedule['day']] = "<td>{$disc}{$groupText}</td>";  
             }          
         }
         return implode('', $listTd);
@@ -57,7 +60,7 @@ class ScheduleHelper
         return $html . '</tr></thead>';
     }
 
-    public static function generateSchedule(HasMany $schedules, string $name, bool $showGroup = false) : string
+    public static function generateSchedule($schedules, string $name, bool $showGroup = false) : string
     {
         $firstSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::FIRST_WEEK)->all();
         $secondSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::SECOND_WEEK)->all();
@@ -83,5 +86,47 @@ class ScheduleHelper
             <tr>$htmlSecondSchedule</tr>";
         }
         return $html . '</tbody>';
+    }
+
+    public static function generateSchedules(Collection $schedules = null, array $titles = []) : string
+    {
+        return str_replace(
+            ['{thead}', '{tbody}'], 
+            [self::thead($titles), self::tbody($schedules)], 
+            "{thead}{tbody}"
+        );
+    }
+
+    protected static function thead(array $titles = []) : string
+    {
+        $html = "<thead><tr><td colspan=\"3\"></td>{rows}</tr></thead>";
+        $titles = array_map(function(string $title) {
+            return "<th>{$title}</th>";
+        }, $titles);
+        return str_replace('{rows}', implode('', $titles), $html);
+    }
+
+    protected static function tbody(Collection $schedules = null) : string
+    {
+        $html = "<tbody>{rows}</tbody>";
+        $rows = [];
+        self::rows();
+        foreach($schedules as $schedule) {
+
+        }
+        return str_replace('{rows}', implode('', $rows), $html);
+    }
+
+    protected static function rows() : array
+    {
+        $classes = ClassModel::orderBy('id')->get();
+        // dd($classes);
+        foreach (self::$days as $day) {
+
+        }
+        foreach ($classes as $class) {
+
+        }
+        return [];
     }
 }

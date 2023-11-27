@@ -11,11 +11,18 @@ class Group extends Model
 
     protected $table = 'groups';
     protected $guarded = false;
-    public function getFaculty(){
+    public function getFaculty() {
         return $this->belongsTo(Faculty::class,'faculty_id','id');
     }
 
-    public function schedules(){
-        return $this->hasMany(Schedule::class);
+    public function schedules() {
+        return $this->hasManyThrough(
+            Schedule::class, 
+            GroupSchedule::class, 
+            'group_id', 
+            'list_group_id', 
+            'id', 
+            'list_group_id'
+        );
     }
 }

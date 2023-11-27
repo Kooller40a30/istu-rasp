@@ -19,12 +19,21 @@ class Schedule extends Model
         return $this->belongsTo(Classroom::class,'classroom_id','id');
     }
 
-    public function getGroup(){
-        return $this->belongsTo(Group::class,'group_id','id');
+    // public function getGroup(){
+    //     return $this->belongsTo(Group::class,'group_id','id');
+    // }
+
+    public function getGroups(){
+        return $this->through('groupSchedule')->has('groups');
     }
 
     public function getClass()
     {
         return $this->belongsTo(ClassModel::class, 'class', 'id');
+    }
+
+    public function groupSchedule()
+    {
+        return $this->hasMany(GroupSchedule::class, 'list_group_id', 'list_group_id');
     }
 }
