@@ -51,4 +51,6 @@
 
 thead {
     background-color: white;
+    position: sticky; 
+    top: 0;
 }

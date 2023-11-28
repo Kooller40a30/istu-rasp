@@ -7,6 +7,7 @@ use App\Models\Schedule;
 use App\Services\GetFromDatabase\ScheduleRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Enumerable;
 
 class ScheduleHelper 
 {
@@ -14,6 +15,8 @@ class ScheduleHelper
     const SECOND_WEEK = 2;
 
     public static $days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+    public static $showGroups = false;
 
     protected static function createSubrowSchedule($schedules, bool $showGroup = false)
     {
@@ -53,7 +56,7 @@ class ScheduleHelper
 
     protected static function createHeaderTable(string $name) 
     {
-        $html = "<thead style=\"position: sticky; top: 0;\"><tr><th colspan=\"2\">$name</th>";
+        $html = "<thead><tr><th colspan=\"2\">$name</th>";
         foreach (self::$days as $day) {
             $html .= "<th>$day</th>";
         }
@@ -92,41 +95,84 @@ class ScheduleHelper
     {
         return str_replace(
             ['{thead}', '{tbody}'], 
-            [self::thead($titles), self::tbody($schedules)], 
-            "{thead}{tbody}"
+            [self::thead($titles), self::tbody($schedules, $titles)], 
+            '{thead}{tbody}'
         );
     }
 
     protected static function thead(array $titles = []) : string
     {
-        $html = "<thead><tr><td colspan=\"3\"></td>{rows}</tr></thead>";
+        $html = '<thead><tr><th colspan="3"></th>{rows}</tr></thead>';
         $titles = array_map(function(string $title) {
             return "<th>{$title}</th>";
         }, $titles);
         return str_replace('{rows}', implode('', $titles), $html);
     }
 
-    protected static function tbody(Collection $schedules = null) : string
+    protected static function tbody(Collection $schedules = null, array $titles = []) : string
     {
-        $html = "<tbody>{rows}</tbody>";
-        $rows = [];
-        self::rows();
-        foreach($schedules as $schedule) {
-
+        $html = '<tbody>{rows}</tbody>';
+        $groupedSchedules = $schedules->groupBy(['day', 'class', 'week']);
+        $rows = "";
+        $currentDay = 0;
+        $classes = ClassModel::orderBy('id')->get()->groupBy('id')->toArray();
+        $listClasses = collect($classes)->map(function($class, $key) {
+            return $class[0]['start_time'] . ' - ' . $class[0]['end_time'];
+        });
+        foreach ($groupedSchedules as $day => $classSchedules) {
+            foreach ($listClasses as $numClass => $time) {
+                $array = $classSchedules[$numClass] ?? [];
+                $rows .= self::addRow($titles, 
+                            $array[self::FIRST_WEEK] ?? [], 
+                            self::$showGroups, 
+                            ['id' => $numClass, 'time' => $time], 
+                            $day != $currentDay ? $day : 0
+                        ) 
+                        . self::addRow($titles, $array[self::SECOND_WEEK] ?? [], self::$showGroups);
+                $currentDay = $day;
+            }
+            
         }
-        return str_replace('{rows}', implode('', $rows), $html);
+        return str_replace('{rows}', $rows, $html);
     }
 
-    protected static function rows() : array
-    {
-        $classes = ClassModel::orderBy('id')->get();
-        // dd($classes);
-        foreach (self::$days as $day) {
-
+    protected static function addRow(array $titles = [], $schedules = [], bool $showGroups = false, array $class = [], int $day = 0) : string
+    {        
+        $rowTemplate = '<tr>{day}{class}{schedules}</tr>';
+        $dayTemplate = $day > 0 ? '<td rowspan="14">{nameDay}</td>' : '';
+        $classTemplate = !empty($class) ? '<td rowspan="2">{numClass}</td><td rowspan="2">{timeClass}</td>' : '';
+        
+        $listTd = [];
+        foreach ($titles as $title) {
+            $listTd[$title] = '<td></td>';
         }
-        foreach ($classes as $class) {
-
+        foreach ($schedules as $schedule) {
+                $groups = $schedule->getGroups->map(function($group, $key) {
+                    return $group['nameGroup'];
+                })->all();
+                $disc = $schedule['content'];
+                $groupText = "";
+                if ($showGroups) {
+                    $groupText = $groups ? ", " . implode(', ', $groups) : "";
+                }
+                
+                foreach ($groups as $group) {
+                    if (in_array($group, $titles)) {
+                        $listTd[$group] = "<td>{$disc}{$groupText}</td>";
+                    }
+                }
         }
-        return [];
+        
+        $html = str_replace(
+            ['{day}', '{class}', '{schedules}'], 
+            [$dayTemplate, $classTemplate, implode('', $listTd)], 
+            $rowTemplate
+        );
+        return str_replace(
+            ['{nameDay}', '{numClass}', '{timeClass}'], 
+            [
+                self::getDay($day), $class['id'] ?? '', 
+                $class['time'] ?? ''
+            ], $html);
     }
 }

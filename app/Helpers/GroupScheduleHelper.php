@@ -16,14 +16,19 @@ class GroupScheduleHelper extends ScheduleHelper
         if ($course) {
             $groupsModel = $groupsModel->where('course_id', '=', $course['id']);
         }
-        $groupsModel = ScheduleRepository::sortManySchedules($groupsModel);
-        dd($groupsModel);
         $titles = $groupsModel->map(function($item, $key) {
             return $item['nameGroup'];
         })->all();
-        $groupsSchedules = $groupsModel->map(function($group, $key) {            
+        $groupsSchedules = $groupsModel->map(function($group) {            
             return $group->schedules;
         });
-        return self::generateSchedules($groupsSchedules, $titles);        
+        $schedules = collect();
+        foreach ($groupsSchedules as $groupSchedules) {
+            foreach ($groupSchedules as $schedule) {
+                $schedules[] = $schedule;
+            }
+        }
+        $schedules = ScheduleRepository::sortManySchedules($schedules);
+        return self::generateSchedules($schedules, $titles);        
     }
 }
