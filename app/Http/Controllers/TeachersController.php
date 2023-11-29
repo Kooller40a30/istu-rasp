@@ -127,7 +127,7 @@ class TeachersController extends Controller
         $teacherName = $teacher['nameTeacher'] ?? 'Все преподаватели';
         $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
         if ($teacher) {
-            $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName, true);
+            $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName);
         } else {
             $result = TeacherScheduleHelper::generateTeachersSchedule($faculty, $dep);
         }

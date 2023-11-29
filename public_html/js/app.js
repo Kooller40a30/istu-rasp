@@ -2,7 +2,7 @@ $(function () {
     $('#btn-group').on('click', (event) => {
         var data = $(event.target).parents('form').serializeArray();
         $.get('/groups_schedule', data, (html, xhr) => {
-            $('#result-schedule').html(html);
+            $('#result-schedule').html(html).change();
         });
         event.preventDefault();
     });
@@ -10,7 +10,7 @@ $(function () {
     $('#btn-teacher').on('click', (event) => {
         var data = $(event.target).parents('form').serializeArray();
         $.get('/teacher_schedule', data, (html, xhr) => {
-            $('#result-schedule').html(html);
+            $('#result-schedule').html(html).change();
         });
         event.preventDefault();
     });
@@ -18,7 +18,7 @@ $(function () {
     $('#btn-room').on('click', (event) => {
         var data = $(event.target).parents('form').serializeArray();
         $.get('/classroom_schedule', data, (html, xhr) => {
-            $('#result-schedule').html(html);
+            $('#result-schedule').html(html).change();
         });
         event.preventDefault();
     });
@@ -32,6 +32,14 @@ $(function () {
                 $('#course-dropdown').val("");
                 $('#course-dropdown').change();
             }
+        });
+    });
+
+    $('#result-schedule').on('change', (event) => {
+        var thead = $('#result-schedule').find('thead')[0]; 
+        var theadHeight = thead.clientHeight;
+        $('tbody').find('td[rowspan]').each((index, elem) => {
+            elem.style.top = theadHeight + 'px';
         });
     });
 

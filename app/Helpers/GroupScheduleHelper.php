@@ -2,14 +2,23 @@
 
 namespace App\Helpers;
 
-use App\Models\ClassModel;
 use App\Models\Course;
 use App\Models\Faculty;
-use App\Models\Group;
+use App\Models\Schedule;
 use App\Services\GetFromDatabase\ScheduleRepository;
 
 class GroupScheduleHelper extends ScheduleHelper
 {
+    static function conditionSection(): callable
+    {
+        return function(Schedule $schedule, array $titles) {
+            $groups = $schedule->getGroups->map(function($group) {
+                return $group['nameGroup'];
+            })->intersect($titles);
+            return $groups;
+        };
+    }
+
     public static function generateCourseSchedule(Faculty $faculty, Course $course = null) : string
     {
         $groupsModel = $faculty->groups;

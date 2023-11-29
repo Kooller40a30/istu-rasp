@@ -135,7 +135,7 @@ class ClassroomsController extends Controller
         if ($classroom) {
             $result = ClassroomScheduleHelper::generateSchedule($classroom->schedules(), $classroomName, true);
         } else {
-            $result = ClassroomScheduleHelper::generateSchedules($faculty, $dep);
+            $result = ClassroomScheduleHelper::generateClassroomSchedules($faculty, $dep);
         }
         return response()->view('result_schedule', compact('result', 'header'));
     }
