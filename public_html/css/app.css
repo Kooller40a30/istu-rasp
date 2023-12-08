@@ -23,7 +23,7 @@
     flex-direction: row-reverse;
     padding-right: 15px;
 }
-.name-university{   
+.name-university{
     text-decoration: none;
     font: 16px "Open Sans", sans-serif;
     color: #FFF;
@@ -85,7 +85,6 @@ col:not(.day, .class, .time) {
     min-width: 150px !important;
     max-width: 200px !important;
     padding: 3px !important;
-
 }
 
 col.day, col.class {
@@ -95,4 +94,19 @@ col.day, col.class {
 
 col.time {
     width: 70px !important;
+}
+
+td {
+    height: 160px;
+    width: 160px;
+}
+
+td:not([rowspan]){
+    border-color: #e0e0e0;
+    border-style: solid;
+    border-width: thin;
+}
+
+table {
+    max-height: 700px;
 }

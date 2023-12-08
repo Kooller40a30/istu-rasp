@@ -9,6 +9,8 @@ use App\Services\GetFromDatabase\ScheduleRepository;
 
 class GroupScheduleHelper extends ScheduleHelper
 {
+    public static $showTeachers = true;
+    
     static function conditionSection(): callable
     {
         return function(Schedule $schedule, array $titles) {

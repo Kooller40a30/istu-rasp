@@ -12,6 +12,10 @@ class ClassroomScheduleHelper extends ScheduleHelper
 {
     public static $showGroups = true;
 
+    public static $showTeachers = true;
+
+    public static $showClassroom = false;
+
     static function conditionSection(): callable
     {
         return function(Schedule $schedule, array $titles) {

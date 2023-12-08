@@ -97,7 +97,7 @@ class TeachersController extends Controller
             $teachers = GetTeachers::teachers();
             $paths = CreateExcelFiles::createTeacherExcel($teacher_id);
             $html = $paths[1];
-            $teacherName = Teacher::where('id',$teacher_id)->value('nameTeacher');
+            $teacherName = Teacher::where('id',$teacher_id)->value('shortNameTeacher');
             $title = 'Расписание преподавателя ' . $teacherName;
             return view('teachers_schedule_table',compact('faculties','departments','teachers','faculty_id','department_id','teacher_id','html','title'));
         }
@@ -111,7 +111,7 @@ class TeachersController extends Controller
         $html = '<option value="">Все преподаватели</option>';
         foreach ($teachers as $teacher) {
             $id = $teacher['id'];
-            $name = $teacher['nameTeacher'];
+            $name = $teacher['shortNameTeacher'];
             $html .= "<option value=\"$id\">$name</option>";
         }
         return response($html);
@@ -124,7 +124,7 @@ class TeachersController extends Controller
         $teacher = Teacher::where('id', '=', (int)$request->query('teacher', 0))->first();
         $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
         $depName = $course['nameDepartment'] ?? 'Все кафедры';
-        $teacherName = $teacher['nameTeacher'] ?? 'Все преподаватели';
+        $teacherName = $teacher['shortNameTeacher'] ?? 'Все преподаватели';
         $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
         if ($teacher) {
             $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName);

@@ -11,19 +11,18 @@ class Schedule extends Model
     protected $table = 'schedules';
     protected $guarded = false;
 
-    public function getTeacher(){
-        return $this->belongsTo(Teacher::class,'teacher_id','id');
+    public function getTeachers()
+    {
+        return $this->hasManyThrough(Teacher::class, TeacherSchedule::class, 'teacher_id', 'id', 'id', 'schedule_id');
     }
 
-    public function getClassroom(){
+    public function getClassroom()
+    {
         return $this->belongsTo(Classroom::class,'classroom_id','id');
     }
 
-    // public function getGroup(){
-    //     return $this->belongsTo(Group::class,'group_id','id');
-    // }
-
-    public function getGroups(){
+    public function getGroups()
+    {
         return $this->through('groupSchedule')->has('groups');
     }
 
@@ -34,6 +33,16 @@ class Schedule extends Model
 
     public function groupSchedule()
     {
-        return $this->hasMany(GroupSchedule::class, 'list_group_id', 'list_group_id');
+        return $this->hasMany(GroupSchedule::class, 'schedule_id', 'id');
+    }
+
+    public function getDiscipline()
+    {
+        return $this->belongsTo(Discipline::class, 'discipline_id', 'id');
+    }
+
+    public function getTypeDiscipline()
+    {
+        return $this->belongsTo(TypeDiscipline::class, 'type_discipline_id', 'id');
     }
 }

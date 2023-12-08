@@ -10,10 +10,11 @@ class GroupSchedule extends Model
     use HasFactory;
     protected $table = 'group_schedule';
     protected $guarded = false;
+    public $timestamps = false;
 
     public function schedules()
     {
-        return $this->hasOne(Schedule::class, 'list_group_id', 'list_group_id');
+        return $this->belongsTo(Schedule::class, 'schedule_id', 'id');
     }
 
     public function groups()

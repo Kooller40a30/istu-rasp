@@ -40,6 +40,20 @@ abstract class ScheduleHelper
     public static $showGroups = false;
 
     /**
+     * Показать список преподавателей в расписании
+     *
+     * @var boolean
+     */
+    public static $showTeachers = false;
+
+    /**
+     * Показать аудиторию
+     *
+     * @var boolean
+     */
+    public static $showClassroom = true;
+
+    /**
      * Условие добавления расписания к заголовку
      * @return callable function(Collection $schedules, array $titles) : bool
      */
@@ -58,8 +72,11 @@ abstract class ScheduleHelper
         foreach ($titles as $title) {
             $listTd[$title] = '<td></td>';
         }
-        foreach ($schedules as $schedule) {            
-            $disc = $schedule['content'];
+        foreach ($schedules as $schedule) { 
+            // if (!$schedule->getDiscipline) {
+            //     continue;
+            // }
+            $disc = $schedule->getDiscipline['nameDiscipline'];
             $groupText = "";
             if (static::$showGroups) {
                 $groups = $schedule->getGroups->map(function($group, $key) {
@@ -67,9 +84,23 @@ abstract class ScheduleHelper
                 })->all();
                 $groupText = $groups ? ", " . implode(', ', $groups) : "";
             }
+            $teacherText = "";
+            if (static::$showTeachers) {
+                // dd($schedule, $schedule->getTeachers);
+                // @todo фигня с преподами, косяк в БД?
+                $teachers = $schedule->getTeachers->map(function($teacher, $key) {
+                    return $teacher['shortNameTeacher'];
+                })->all();
+                $teacherText = $teachers ? ", " . implode(', ', $teachers) : "";
+            }
+            $room = "";
+            if (static::$showClassroom && $schedule->getClassroom) {
+                $room = ", " . $schedule->getClassroom['numberClassroom'];
+            }
+            $type = $schedule->getTypeDiscipline['shortName'];
             $validKeys = $condition($schedule, $titles);
             foreach ($validKeys as $key) {
-                $listTd[$key] = "<td>{$disc}{$groupText}</td>";
+                $listTd[$key] = "<td>({$type}) {$disc}{$teacherText}{$groupText}{$room}</td>";
             }
         }
         return implode('', $listTd);

@@ -20,9 +20,9 @@ class Group extends Model
             Schedule::class, 
             GroupSchedule::class, 
             'group_id', 
-            'list_group_id', 
             'id', 
-            'list_group_id'
+            'id', 
+            'schedule_id'
         );
     }
 }
