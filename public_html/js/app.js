@@ -88,7 +88,7 @@ $(function () {
         var faculty_id = $(event.target).val();
         $.ajax({
             url: '/departments',
-            data: { faculty: faculty_id },
+            data: { faculty: faculty_id, for_room: 1 },
             success: (deps) => {
                 $('#room_department').html(deps);
                 $('#room_department').val("");

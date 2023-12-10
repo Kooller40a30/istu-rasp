@@ -14,6 +14,7 @@ use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Schedule;
 use App\Models\Teacher;
+use App\Services\ClassroomService;
 use App\Services\GetFromDatabase\GetClassrooms;
 use App\Services\GetFromDatabase\GetDepartments;
 use App\Services\GetFromDatabase\GetFaculties;
@@ -113,7 +114,15 @@ class ClassroomsController extends Controller
     {
         $faculty_id = (int)$request->query('faculty', 0);
         $dep_id = (int)$request->query('dep', 0);
-        $classrooms = GetClassrooms::classrooms($faculty_id, $dep_id);
+        $faculty = Faculty::where('id', $faculty_id)->first();
+        $dep = Department::where('id', $dep_id)->first();
+        if ($faculty_id == Faculty::NOT_VALID_ID) {
+            $faculty = new Faculty(['id' => $faculty_id]);
+        }
+        if ($dep_id == Department::NOT_VALID_ID) {
+            $dep = new Department(['id' => $dep_id]);
+        }    
+        $classrooms = ClassroomService::filterClassrooms($dep, $faculty);
         $html = '<option value="">Все аудитории</option>';
         foreach ($classrooms as $room) {
             $id = $room['id'];
@@ -126,7 +135,12 @@ class ClassroomsController extends Controller
     public function loadClassroomSchedule(Request $request) 
     {
         $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
-        $dep = Department::where('id', '=', (int)$request->query('department', 0))->first();
+        $dep_id = (int)$request->query('department', 0);
+        if ($dep_id == Department::NOT_VALID_ID) {
+            $dep = new Department(['id' => null]);
+        } else {
+            $dep = Department::where('id', '=', $dep_id)->first();
+        }
         $classroom = Classroom::where('id', '=', (int)$request->query('classroom', 0))->first();
         $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
         $depName = $dep['nameDepartment'] ?? 'Все кафедры';

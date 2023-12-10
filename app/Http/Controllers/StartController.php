@@ -25,11 +25,14 @@ class StartController extends Controller
         $faculty_id = $request->input('faculty', 0);
         $group_id = $request->input('group', 0);
         $courseName = $request->input('course', "");
-        $faculties = GetFaculties::facultiesToGroups();
+        $facultiesGroup = GetFaculties::facultiesToGroups();
+        $facultiesTeacher = GetFaculties::facultiesToTeachers();
+        $facultiesRoom = GetFaculties::facultiesToClassrooms();
         $courses = GetGroupsCourses::courses($faculty_id);
         $groups = [];
         $result = "";        
         
-        return view('main_page', compact('faculties', 'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'result'));
+        return view('main_page', compact('facultiesGroup', 'facultiesTeacher', 'facultiesRoom', 
+                    'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'result'));
     }
 }

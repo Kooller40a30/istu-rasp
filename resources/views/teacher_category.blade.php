@@ -9,7 +9,7 @@
                 <select class="form-select mb-3" name="faculty" id="teacher_faculty">
                     <option disabled="" selected="">Выберите институт/факультет
                     </option>
-                    @foreach($faculties as $faculty)
+                    @foreach($facultiesTeacher as $faculty)
                         @if($faculty_id != 0 && $faculty_id == $faculty['id'])
                             <option selected value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
                         @else <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
