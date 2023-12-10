@@ -2,16 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\FileRequest;
-use App\Models\Classroom;
-use App\Models\Department;
-use App\Models\Error;
-use App\Models\Schedule;
-use App\Models\Teacher;
-use App\ReadExcel\GetPath;
-use App\ReadExcel\ReadExcelClassroom;
-use App\ReadExcel\ReadExcelSchedule;
-use App\ReadExcel\ReadExcelTeacher;
+use App\ReadExcel\TemplateExcelReader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -35,34 +26,25 @@ class DownloadSchedulesController extends Controller
         return view('download_schedules',compact('error'));
     }
 
-    public function readSchedules(Request $request){
-        //dd($request);
+    public function readSchedules(Request $request) 
+    {        
         set_time_limit(0);
-        $rules = array(
-            'import_files'  => 'required'
-        );
+        $rules = array('import_files'  => 'required');
 
         $error = Validator::make($request->all(), $rules);
 
-        if($error->fails())
-        {
-            //dd($error->errors()->all());
+        if($error->fails()) {
             return response()->json(['errors' => $error->errors()->all()]);
         }
-        else {
-            ReadExcelSchedule::readFiles($request->file('import_files'));
-            /*Schedule::where('id', '>', 0)->delete();
-            Error::where('id', '>', 0)->delete();
-            foreach ($request->file('import_files') as $file){
-                $filename = $file->getClientOriginalName();
-                $path = GetPath::savePath($file);
-                ReadExcelSchedule::readFile($path, $filename);
-            }*/
-            $output = array(
-                'success' => ' ',
-            );
-            return response()->json($output);
-        }
-        //return response()->json(['success'=>'Form is successfully submitted!']);
+        // новый парсер (2023 год)
+        $files = $request->file('import_files');
+        $excelReader = new TemplateExcelReader();
+        $excelReader->processFiles($files);
+        
+        // старый парсер (2022 год)
+        // ReadExcelSchedule::readFiles($request->file('import_files'));
+
+        $output = array('success' => ' ');
+        return response()->json($output);
     }
 }

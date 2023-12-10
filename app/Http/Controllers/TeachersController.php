@@ -3,22 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateExcelFiles;
-use App\Helpers\ScheduleHelper;
 use App\Helpers\TeacherScheduleHelper;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
 use App\Http\Requests\TeacherRequest;
-use App\Models\Classroom;
 use App\Models\Department;
-use App\Models\DepartmentTeacher;
 use App\Models\Faculty;
-use App\Models\Schedule;
 use App\Models\Teacher;
 use App\Services\GetFromDatabase\GetDepartments;
 use App\Services\GetFromDatabase\GetFaculties;
 use App\Services\GetFromDatabase\GetTeachers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TeachersController extends Controller
 {

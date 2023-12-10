@@ -14,8 +14,10 @@ class TeacherScheduleHelper extends ScheduleHelper
     static function conditionSection(): callable
     {
         return function(Schedule $schedule, array $titles) {
-            $teacher = $schedule->getTeacher['shortNameTeacher'];
-            return array_intersect([$teacher], $titles);
+            $teachers = $schedule->getTeachers->map(function($teacher) {
+                return $teacher['shortNameTeacher'];
+            })->all();
+            return array_intersect($teachers, $titles);
         };
     }
 

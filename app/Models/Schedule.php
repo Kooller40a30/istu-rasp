@@ -13,7 +13,7 @@ class Schedule extends Model
 
     public function getTeachers()
     {
-        return $this->hasManyThrough(Teacher::class, TeacherSchedule::class, 'teacher_id', 'id', 'id', 'schedule_id');
+        return $this->hasManyThrough(Teacher::class, TeacherSchedule::class, 'schedule_id', 'id', 'id', 'teacher_id');
     }
 
     public function getClassroom()
