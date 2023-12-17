@@ -2,7 +2,7 @@
 <header>
     <nav class="navbar">
         <div class="container justify-content-end">
-            <a class="nav-link link-animation" href="#">Для администратора</a>
+            <button id="showLoginFormButton" class="nav-link link-animation" data-bs-toggle="modal" data-bs-target="#loginModal">Для администратора</button>
         </div>
     </nav>
 </header>
