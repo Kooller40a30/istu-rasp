@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classroom;
+use App\Models\Department;
+use App\Models\Teacher;
+use App\Services\GetFromDatabase\CoursesRepository;
+use App\Services\GetFromDatabase\GetDepartments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Services\GetFromDatabase\GetFaculties;
+use App\Services\GetFromDatabase\GetGroups;
 use App\Services\GetFromDatabase\GetGroupsCourses;
 
 class StartController extends Controller
@@ -22,17 +28,17 @@ class StartController extends Controller
                 Storage::delete($file);
             }
         });
-        $faculty_id = $request->input('faculty', 0);
-        $group_id = $request->input('group', 0);
-        $courseName = $request->input('course', "");
         $facultiesGroup = GetFaculties::facultiesToGroups();
         $facultiesTeacher = GetFaculties::facultiesToTeachers();
         $facultiesRoom = GetFaculties::facultiesToClassrooms();
-        $courses = GetGroupsCourses::courses($faculty_id);
-        $groups = [];
+        $courses = CoursesRepository::findAll();
+        $groups = GetGroups::groups();
+        $deps = Department::get();
+        $teachers = Teacher::get();
+        $classrooms = Classroom::get();
         $result = "";        
         
         return view('main_page', compact('facultiesGroup', 'facultiesTeacher', 'facultiesRoom', 
-                    'courses', 'groups', 'faculty_id', 'group_id', 'courseName', 'result'));
+                    'teachers', 'deps', 'classrooms', 'courses', 'groups', 'result'));
     }
 }

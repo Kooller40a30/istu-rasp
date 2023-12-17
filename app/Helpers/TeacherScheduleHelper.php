@@ -21,9 +21,13 @@ class TeacherScheduleHelper extends ScheduleHelper
         };
     }
 
-    public static function generateTeachersSchedule(Faculty $faculty, Department $department = null) : string
+    public static function generateTeachersSchedule(Faculty $faculty = null, Department $department = null) : string
     {
-        $departments = $faculty->departments;
+        if ($faculty) {
+            $departments = $faculty->departments;
+        } else {
+            $departments = Department::get();
+        }
         if ($department) {
             $departments = $departments->where('id', '=', $department['id']);
         }

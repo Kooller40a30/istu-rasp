@@ -9,7 +9,13 @@ class CoursesController extends Controller
 {
     public function getCourses(Request $request)
     {
-        $faculty = (int)$request->query('faculty');
+        $faculty = (int)$request->query('faculty');        
+        $list = static::getList($faculty);
+        return response($list);
+    }
+
+    public static function getList($faculty)
+    {
         $courses = CoursesRepository::findAll($faculty);
         $list = '<option value="">Все курсы</option>';
         foreach ($courses as $course) {
@@ -17,6 +23,6 @@ class CoursesController extends Controller
             $name = $course['nameCourse'];
             $list .= "<option value=\"$id\">$name</option>";
         }
-        return response($list);
+        return $list;
     }
 }

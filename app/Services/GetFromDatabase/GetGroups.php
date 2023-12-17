@@ -13,13 +13,17 @@ class GetGroups
      * @param integer $course курс
      * @return array
      */
-    public static function groups(int $faculty, int $course)
+    public static function groups(int $faculty = 0, int $course = 0)
     {
         $builder = Group::select('id', 'nameGroup')
-            ->where("faculty_id", $faculty);
-        if ($course > 0) {
-            $builder->where("course_id", $course);
-        }
+            ->where(function($query) use ($faculty, $course){
+                if ($faculty) {
+                    $query->where("faculty_id", $faculty);
+                }
+                if ($course) {
+                    $query->where("course_id", $course);
+                }
+            });
         return $builder->get();
     }
 

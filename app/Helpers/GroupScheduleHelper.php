@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Course;
 use App\Models\Faculty;
+use App\Models\Group;
 use App\Models\Schedule;
 use App\Services\GetFromDatabase\ScheduleRepository;
 
@@ -21,9 +22,13 @@ class GroupScheduleHelper extends ScheduleHelper
         };
     }
 
-    public static function generateCourseSchedule(Faculty $faculty, Course $course = null) : string
+    public static function generateCourseSchedule(Faculty $faculty = null, Course $course = null) : string
     {
-        $groupsModel = $faculty->groups;
+        if ($faculty) {
+            $groupsModel = $faculty->groups;
+        } else {
+            $groupsModel = Group::get();
+        }
         if ($course) {
             $groupsModel = $groupsModel->where('course_id', '=', $course['id']);
         }

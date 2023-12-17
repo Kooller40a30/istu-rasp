@@ -10,10 +10,7 @@
                     <option disabled="" selected="">Выберите институт/факультет
                     </option>
                     @foreach($facultiesTeacher as $faculty)
-                        @if($faculty_id != 0 && $faculty_id == $faculty['id'])
-                            <option selected value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
-                        @else <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
-                        @endif
+                        <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
                     @endforeach
                 </select>
             </div>
@@ -22,12 +19,18 @@
                 <label for="department" class="form-label">Выберите кафедру</label>
                 <select class="form-select mb-3" name="department" id="department">
                     <option disabled="" selected="">Выберите кафедру</option>
+                    @foreach($deps as $dep)                        
+                        <option value="{{$dep['id']}}" >{{$dep['nameDepartment']}}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="row">
                 <label for="teacher" class="form-label">Выберите преподавателя</label>
                 <select class="form-select mb-3" name="teacher" id="teacher">
                     <option disabled="" selected="">Выберите преподавателя</option>
+                    @foreach($teachers as $teacher)                        
+                        <option value="{{$teacher['id']}}" >{{$teacher['nameTeacher']}}</option>
+                    @endforeach
             </div>
 
             <div class="row">

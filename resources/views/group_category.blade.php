@@ -9,10 +9,7 @@
                 <select class="form-select mb-3" name="faculty" id="group_faculty">
                     <option disabled="" selected="">Выберите институт/факультет</option>
                     @foreach($facultiesGroup as $faculty)
-                        @if($faculty_id != 0 && $faculty_id == $faculty['id'])
-                            <option selected value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
-                        @else <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
-                        @endif
+                        <option value="{{$faculty['id']}}" >{{$faculty['nameFaculty']}}</option>
                     @endforeach
                 </select>
             </div>
@@ -21,11 +18,8 @@
                 <select class="form-select mb-3" name="course" id="course-dropdown">
                     <option disabled="" selected="">Выберите курс</option>
                     @if(isset($courses))
-                        @foreach($courses as $course)
-                            @if($courseName != 0 && $courseName == $course['course'])
-                                <option selected value="{{$course['course']}}" >{{$course['course']}}</option>
-                            @else <option value="{{$course['course']}}" >{{$course['course']}}</option>
-                            @endif
+                        @foreach($courses as $course)                            
+                            <option value="{{$course['id']}}" >{{$course['nameCourse']}}</option>
                         @endforeach
                     @endif
                 </select>
@@ -36,10 +30,7 @@
                 <select class="form-select mb-3" name="group" id="group-dropdown">
                     <option disabled="" selected="">Выберите группу</option>
                     @foreach($groups as $group)
-                        @if($group_id != 0 && $group_id == $group['id'])
-                            <option selected value="{{$group['id']}}" >{{$group['nameGroup']}}</option>
-                        @else <option value="{{$group['id']}}" >{{$group['nameGroup']}}</option>
-                        @endif
+                        <option value="{{$group['id']}}" >{{$group['nameGroup']}}</option>
                     @endforeach
                 </select>
             </div>
