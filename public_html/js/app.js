@@ -1,4 +1,7 @@
 $(function () {
+
+    $('.selectize-js').selectize();
+
     $('#btn-group').on('click', (event) => {
         var data = $(event.target).parents('form').serializeArray();
         $.get('/groups_schedule', data, (html, xhr) => {
