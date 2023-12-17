@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Classroom;
 use App\Models\Department;
 use App\Models\Teacher;
+use App\Services\FileService;
 use App\Services\GetFromDatabase\CoursesRepository;
-use App\Services\GetFromDatabase\GetDepartments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Services\GetFromDatabase\GetFaculties;
 use App\Services\GetFromDatabase\GetGroups;
-use App\Services\GetFromDatabase\GetGroupsCourses;
 
 class StartController extends Controller
 {
@@ -36,9 +35,11 @@ class StartController extends Controller
         $deps = Department::get();
         $teachers = Teacher::get();
         $classrooms = Classroom::get();
-        $result = "";        
+        $result = "";
+        
+        $typesFile = FileService::getTypeFiles();
         
         return view('main_page', compact('facultiesGroup', 'facultiesTeacher', 'facultiesRoom', 
-                    'teachers', 'deps', 'classrooms', 'courses', 'groups', 'result'));
+                    'teachers', 'deps', 'classrooms', 'courses', 'groups', 'result', 'typesFile'));
     }
 }

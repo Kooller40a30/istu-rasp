@@ -15,6 +15,8 @@ use App\Http\Controllers\TeachersController;
 use App\Services\GetFromDatabase\GetGroups;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\UploadController;
 use Psy\Util\Json;
 
 /*
@@ -182,4 +184,8 @@ Route::post('/download_faculties', [DownloadFacultiesController::class, 'readFac
 Route::get('/download_departments_page', [DownloadDepartmentsController::class, 'index'])->name('download_departments_page');
 Route::post('/download_departments', [DownloadDepartmentsController::class, 'readDepartment'])->name('download_departments');
 
+//аутентификация
+Route::any('/authenticate', [LoginController::class, 'authenticate'])->name('authenticate');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::post('/upload_files', [UploadController::class, 'uploadFiles'])->name('upload_files');
