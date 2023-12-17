@@ -6,7 +6,7 @@
             @csrf
             <div class="row">
                 <label for="teacher" class="form-label">Выберите институт/факультет</label>
-                <select class="selectize-js mb-3" name="faculty" id="teacher_faculty">
+                <select class="form-select mb-3" name="faculty" id="teacher_faculty">
                     <option disabled="" selected="">Выберите институт/факультет
                     </option>
                     @foreach($facultiesTeacher as $faculty)
@@ -17,7 +17,7 @@
 
             <div class="row">
                 <label for="department" class="form-label">Выберите кафедру</label>
-                <select class="selectize-js mb-3" name="department" id="department">
+                <select class="form-select mb-3" name="department" id="department">
                     <option disabled="" selected="">Выберите кафедру</option>
                     @foreach($deps as $dep)                        
                         <option value="{{$dep['id']}}" >{{$dep['nameDepartment']}}</option>
@@ -26,7 +26,7 @@
             </div>
             <div class="row">
                 <label for="teacher" class="form-label">Выберите преподавателя</label>
-                <select class="selectize-js mb-3" name="teacher" id="teacher">
+                <select class="form-select mb-3" name="teacher" id="teacher">
                     <option disabled="" selected="">Выберите преподавателя</option>
                     @foreach($teachers as $teacher)                        
                         <option value="{{$teacher['id']}}" >{{$teacher['nameTeacher']}}</option>
