@@ -45,7 +45,7 @@ abstract class TemplateScheduleParser
         'чт' => 4,
         'пт' => 5,
         'сб' => 6,
-        'вск' => 7,
+        'вс' => 7,
     ];
 
     /**

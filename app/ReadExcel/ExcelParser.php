@@ -58,13 +58,16 @@ class ExcelParser extends TemplateScheduleParser
             return;
         }        
         $schedule = $this->addSchedule($row, $col, $discipline);
+        if (!$schedule){
+            return;
+        }
         // связь расписания с преподами 
         $teacherCol = $this->getCellValue($row, static::nextLetter($col, 2));
         $this->addTeacherSchedules($teacherCol, $schedule);
         
         // связь расписания с группами
         $group = Group::where('nameGroup', $this->getCellValue(static::GROUP_ROW, $col));
-        if ($group) {
+        if ($group->first()) {
             GroupScheduleService::addGroupSchedule($group->first(), $schedule);
         } else {
             // @todo нет группы в расписании, т.к. ее нет в базе
@@ -88,7 +91,10 @@ class ExcelParser extends TemplateScheduleParser
 
     protected function addSchedule($row, string $col, string $discipline)
     {    
-        $shortNameTypeDisc = static::skipRepeats($this->getCellValue($row, static::nextLetter($col, 1)));        
+        $shortNameTypeDisc = static::skipRepeats($this->getCellValue($row, static::nextLetter($col, 1)));     
+        if (!$shortNameTypeDisc){
+            return false;    
+        }
         $classroom = static::getClassroom($this->getCellValue($row, static::nextLetter($col, 3)));
 
         $attributes = [

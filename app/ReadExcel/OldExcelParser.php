@@ -107,14 +107,17 @@ class OldExcelParser extends TemplateScheduleParser
         if (!$text) {
             return $this->getDayAndWeekCell($row - 1);
         }
+        
         $dayAndWeekText = trim(mb_strtolower($text, 'UTF-8'));
         $array = explode("\n", $dayAndWeekText);
         if (count($array) == 1) {
-            return [static::WEEK[$array[0]], static::FIRST_WEEK];
+            $week = static::WEEK[mb_substr(trim($array[0]), 0, 2)];
+            return [$week, static::FIRST_WEEK];
         }
+
         list($day, $week) = $array;
         $day = static::WEEK[$day];
-        $week = $week == 'над чертой' ? static::FIRST_WEEK : static::SECOND_WEEK;
+        $week = mb_stripos($week, 'над', 0) !== false ? static::FIRST_WEEK : static::SECOND_WEEK;
         return [$day, $week];
     }
 
