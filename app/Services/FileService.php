@@ -17,7 +17,7 @@ class FileService
     const TYPE_FILE_GROUP = 1;
     const TYPE_FILE_DEP = 2;
     const TYPE_FILE_TEACHER = 3;
-    const TYPE_FILE_SHCEDULE = 4;
+    const TYPE_FILE_SCHEDULE = 4;
     const TYPE_FILE_FACULTY = 5;
 
     public static function getTypeFiles()
@@ -27,7 +27,7 @@ class FileService
             static::TYPE_FILE_GROUP => 'Группы', 
             static::TYPE_FILE_DEP => 'Кафедры',
             static::TYPE_FILE_TEACHER => 'Преподаватели', 
-            static::TYPE_FILE_SHCEDULE => 'Расписание',
+            static::TYPE_FILE_SCHEDULE => 'Расписание',
             static::TYPE_FILE_FACULTY => 'Факультеты', 
         ];
     }
@@ -41,7 +41,7 @@ class FileService
         }
 
         //@todo избавиться от костыля с if
-        if ($type == static::TYPE_FILE_SHCEDULE) {
+        if ($type == static::TYPE_FILE_SCHEDULE) {
             // обработка расписания
             $excelReader = new TemplateExcelReader();
             $excelReader->processFiles($files);
