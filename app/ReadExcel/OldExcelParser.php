@@ -11,18 +11,21 @@ use App\Services\ScheduleService;
 use App\Services\TeacherScheduleService;
 use App\Services\TypeDisciplineService;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpParser\Node\Stmt\Static_;
+
+use function PHPUnit\Framework\matches;
 
 class OldExcelParser extends TemplateScheduleParser
 {
     /**
      * Столбцы с группами (дисциплинами)
      */
-    const GROUP_COLUMNS = ['C', 'G', 'K'];
+    const GROUP_COLUMNS = ['B', 'F', 'J'];
 
     /**
      * Столбец с днями и тип недели (над чертой, под чертой)
      */
-    const DAYS_AND_WEEK_COLUMN = 'B';
+    const DAYS_AND_WEEK_COLUMN = 'A';
 
     /**
      * Переход к следующему расписанию
@@ -108,16 +111,26 @@ class OldExcelParser extends TemplateScheduleParser
             return $this->getDayAndWeekCell($row - 1);
         }
         
-        $dayAndWeekText = trim(mb_strtolower($text, 'UTF-8'));
-        $array = explode("\n", $dayAndWeekText);
-        if (count($array) == 1) {
-            $week = static::WEEK[mb_substr(trim($array[0]), 0, 2)];
-            return [$week, static::FIRST_WEEK];
+        $dayAndWeekText = mb_strtolower($text, 'UTF-8');
+        // if (count($array) == 1) {
+        //     $week = static::WEEK[mb_substr(trim($array[0]), 0, 2)];
+        //     return [$week, static::FIRST_WEEK];
+        // }
+        $matches = [];
+        preg_match('/(\w+)\s\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
+        if (!isset($matches[1])){
+            return [static::WEEK["вс"], static::FIRST_WEEK];
+        }
+        $day = static::WEEK[$matches[1]];
+        $weekText = $matches[2] ?? 'над';
+        if (strpos($weekText, 'над') !== false) {
+            $week = static::FIRST_WEEK;
+        } elseif (strpos($weekText, 'под') !== false) {
+            $week = static::SECOND_WEEK;
+        } else {
+            $week = static::FIRST_WEEK;
         }
 
-        list($day, $week) = $array;
-        $day = static::WEEK[$day];
-        $week = mb_stripos($week, 'над', 0) !== false ? static::FIRST_WEEK : static::SECOND_WEEK;
         return [$day, $week];
     }
 
