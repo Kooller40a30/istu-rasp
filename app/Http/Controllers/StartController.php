@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Classroom;
 use App\Models\Department;
-use App\Models\Schedule;
 use App\Models\Teacher;
+use App\Services\FileService;
+use App\Services\GetFromDatabase\CoursesRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Services\GetFromDatabase\GetFaculties;
+use App\Services\GetFromDatabase\GetGroups;
 
 class StartController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-
         Storage::deleteDirectory('public_html/schedule');
         $files = collect(Storage::allFiles('public//schedule'));
         $files->each(function ($file) {
@@ -25,7 +27,19 @@ class StartController extends Controller
                 Storage::delete($file);
             }
         });
-
-        return view('main_page');
+        $facultiesGroup = GetFaculties::facultiesToGroups();
+        $facultiesTeacher = GetFaculties::facultiesToTeachers();
+        $facultiesRoom = GetFaculties::facultiesToClassrooms();
+        $courses = CoursesRepository::findAll();
+        $groups = GetGroups::groups();
+        $deps = Department::get();
+        $teachers = Teacher::get();
+        $classrooms = Classroom::get();
+        $result = "";
+        
+        $typesFile = FileService::getTypeFiles();
+        
+        return view('main_page', compact('facultiesGroup', 'facultiesTeacher', 'facultiesRoom', 
+                    'teachers', 'deps', 'classrooms', 'courses', 'groups', 'result', 'typesFile'));
     }
 }

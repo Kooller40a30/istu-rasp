@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+
+    const NOT_VALID_ID = -1;
+
     protected $table = 'departments';
 
     protected $guarded = false;

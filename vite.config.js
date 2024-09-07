@@ -7,6 +7,9 @@ export default defineConfig({
             input: [
                 'resources/sass/app.scss',
                 'resources/js/app.js',
+                'node_modules/@selectize/selectize/dist/js/selectize.js', 
+                'node_modules/jquery/dist/jquery.min.js',
+                'node_modules/microplugin/src/microplugin.js'
             ],
             refresh: true,
         }),

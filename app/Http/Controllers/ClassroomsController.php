@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateExcelFiles;
+use App\Helpers\ClassroomScheduleHelper;
+use App\Helpers\TeacherScheduleHelper;
 use App\Http\Requests\ClassroomRequest;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
@@ -12,6 +14,7 @@ use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Schedule;
 use App\Models\Teacher;
+use App\Services\ClassroomService;
 use App\Services\GetFromDatabase\GetClassrooms;
 use App\Services\GetFromDatabase\GetDepartments;
 use App\Services\GetFromDatabase\GetFaculties;
@@ -25,7 +28,7 @@ class ClassroomsController extends Controller
         //Storage::createDirectory('public/schedule');
         $faculties = GetFaculties::facultiesToClassrooms();
         $departments = GetDepartments::classroomsDepartments();
-        $classrooms = GetClassrooms::classrooms(null);
+        $classrooms = GetClassrooms::classrooms();
         $faculty_id = -1;
         $department_id = -1;
         $classroom_id = -1;
@@ -105,5 +108,49 @@ class ClassroomsController extends Controller
             $title = 'Расписание аудитории ' . $classroomName;
             return view('classrooms_schedule_table',compact('faculties','departments','classrooms','faculty_id','department_id','classroom_id','html','title'));
         }
+    }
+
+    public function getClassrooms(Request $request)
+    {
+        $faculty_id = (int)$request->query('faculty', 0);
+        $dep_id = (int)$request->query('dep', 0);
+        $faculty = Faculty::where('id', $faculty_id)->first();
+        $dep = Department::where('id', $dep_id)->first();
+        if ($faculty_id == Faculty::NOT_VALID_ID) {
+            $faculty = new Faculty(['id' => $faculty_id]);
+        }
+        if ($dep_id == Department::NOT_VALID_ID) {
+            $dep = new Department(['id' => $dep_id]);
+        }    
+        $classrooms = ClassroomService::filterClassrooms($dep, $faculty);
+        $html = '<option value="">Все аудитории</option>';
+        foreach ($classrooms as $room) {
+            $id = $room['id'];
+            $name = $room['numberClassroom'];
+            $html .= "<option value=\"$id\">$name</option>";
+        }
+        return response($html);
+    }
+
+    public function loadClassroomSchedule(Request $request) 
+    {
+        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
+        $dep_id = (int)$request->query('department', 0);
+        if ($dep_id == Department::NOT_VALID_ID) {
+            $dep = new Department(['id' => null]);
+        } else {
+            $dep = Department::where('id', '=', $dep_id)->first();
+        }
+        $classroom = Classroom::where('id', '=', (int)$request->query('classroom', 0))->first();
+        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
+        $depName = $dep['nameDepartment'] ?? 'Все кафедры';
+        $classroomName = $classroom['numberClassroom'] ?? 'Все аудитории';
+        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Аудитория: {$classroomName}";
+        if ($classroom) {
+            $result = ClassroomScheduleHelper::generateSchedule($classroom->schedules(), $classroomName, true);
+        } else {
+            $result = ClassroomScheduleHelper::generateClassroomSchedules($faculty, $dep);
+        }
+        return response()->view('result_schedule', compact('result', 'header'));
     }
 }

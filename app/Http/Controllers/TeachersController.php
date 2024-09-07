@@ -3,20 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\CreateExcel\CreateExcelFiles;
+use App\Helpers\TeacherScheduleHelper;
 use App\Http\Requests\DepartmentRequest;
 use App\Http\Requests\FacultyRequest;
 use App\Http\Requests\TeacherRequest;
-use App\Models\Classroom;
 use App\Models\Department;
-use App\Models\DepartmentTeacher;
 use App\Models\Faculty;
-use App\Models\Schedule;
 use App\Models\Teacher;
 use App\Services\GetFromDatabase\GetDepartments;
 use App\Services\GetFromDatabase\GetFaculties;
 use App\Services\GetFromDatabase\GetTeachers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TeachersController extends Controller
 {
@@ -95,9 +92,40 @@ class TeachersController extends Controller
             $teachers = GetTeachers::teachers();
             $paths = CreateExcelFiles::createTeacherExcel($teacher_id);
             $html = $paths[1];
-            $teacherName = Teacher::where('id',$teacher_id)->value('nameTeacher');
+            $teacherName = Teacher::where('id',$teacher_id)->value('shortNameTeacher');
             $title = 'Расписание преподавателя ' . $teacherName;
             return view('teachers_schedule_table',compact('faculties','departments','teachers','faculty_id','department_id','teacher_id','html','title'));
         }
+    }
+
+    public function getTeachers(Request $request)
+    {
+        $faculty_id = (int)$request->query('faculty');
+        $dep_id = (int)$request->query('dep');
+        $teachers = GetTeachers::teachers($faculty_id, $dep_id);
+        $html = '<option value="">Все преподаватели</option>';
+        foreach ($teachers as $teacher) {
+            $id = $teacher['id'];
+            $name = $teacher['shortNameTeacher'];
+            $html .= "<option value=\"$id\">$name</option>";
+        }
+        return response($html);
+    }
+
+    public function loadTeacherSchedule(Request $request)
+    {
+        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
+        $dep = Department::where('id', '=', (int)$request->query('department', 0))->first();
+        $teacher = Teacher::where('id', '=', (int)$request->query('teacher', 0))->first();
+        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
+        $depName = $course['nameDepartment'] ?? 'Все кафедры';
+        $teacherName = $teacher['shortNameTeacher'] ?? 'Все преподаватели';
+        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
+        if ($teacher) {
+            $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName);
+        } else {
+            $result = TeacherScheduleHelper::generateTeachersSchedule($faculty, $dep);
+        }
+        return response()->view('result_schedule', compact('result', 'header'));
     }
 }
