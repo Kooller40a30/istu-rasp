@@ -123,13 +123,7 @@ class OldExcelParser extends TemplateScheduleParser
         }
         $day = static::WEEK[$matches[1]];
         $weekText = $matches[2] ?? 'над';
-        if (strpos($weekText, 'над') !== false) {
-            $week = static::FIRST_WEEK;
-        } elseif (strpos($weekText, 'под') !== false) {
-            $week = static::SECOND_WEEK;
-        } else {
-            $week = static::FIRST_WEEK;
-        }
+        $week = mb_stripos($weekText, 'над', 0) !== false ? static::FIRST_WEEK : static::SECOND_WEEK;
 
         return [$day, $week];
     }
