@@ -18,16 +18,6 @@ use function PHPUnit\Framework\matches;
 class OldExcelParser extends TemplateScheduleParser
 {
     /**
-     * Столбцы с группами (дисциплинами)
-     */
-    const GROUP_COLUMNS = ['B', 'F', 'J'];
-
-    /**
-     * Столбец с днями и тип недели (над чертой, под чертой)
-     */
-    const DAYS_AND_WEEK_COLUMN = 'A';
-
-    /**
      * Переход к следующему расписанию
      */
     const DELTA_SCHEDULE = 3;
@@ -37,15 +27,67 @@ class OldExcelParser extends TemplateScheduleParser
      */
     const WEEKEND = 7;
 
+
+    protected $columns = [];
+
     public function processSheet(Worksheet $sheet)
     {
         $this->sheet = $sheet;
+        $this->defineColumns(); // Определяем столбцы динамически
         $highestRow = $this->sheet->getHighestRow();
-        for ($row = 3; $row < $highestRow; $row+=static::DELTA_SCHEDULE) {
-            foreach (static::GROUP_COLUMNS as $colGroup) {
+        for ($row = 3; $row < $highestRow; $row += static::DELTA_SCHEDULE) {
+            foreach ($this->columns['group_columns'] as $colGroup) {
                 $this->processSchedule($row, $colGroup);
             }
-        }        
+        }
+    }
+
+    /**
+    * Определяем столбцы на основе структуры листа.
+     */
+    protected function defineColumns()
+    {
+        // Логика для определения динамических столбцов
+        $this->columns['group_columns'] = $this->findGroupColumns();
+        $this->columns['days_and_week_column'] = $this->findDaysAndWeekColumn();
+    }
+
+    protected function findGroupColumns()
+    {
+        $columns = [];
+        $row = 2; // строка, в которой ожидается наличие групп
+    
+        for ($col = 'A'; $col <= 'Z'; $col++) {
+            $value = $this->getCellValue($row, $col);
+            if ($this->isGroupValue($value)) {
+                $columns[] = $col;
+            }
+        }
+    
+        return $columns;
+    }
+    
+    /**
+     * Проверяет, соответствует ли значение шаблону группы.
+     */
+    protected function isGroupValue($value)
+    {
+        return preg_match('/^[А-Я]{1}\d{2}-\d{3}-\d{1}$/u', $value);
+    }
+
+    /**
+     * Пример поиска столбца с днями и неделями.
+     */
+    protected function findDaysAndWeekColumn()
+    {
+        for ($col = 'A'; $col <= 'Z'; $col++) {
+            $header = $this->getCellValue(2, $col);
+            //сведения о дне недели и четности лежит в колонке под именем "число"
+            if (mb_stripos($header, 'число') !== false) {
+                return $col;
+            }
+        }
+        return 'A'; // Значение по умолчанию
     }
 
     protected function processSchedule(&$row, string $col)
@@ -54,7 +96,7 @@ class OldExcelParser extends TemplateScheduleParser
         if (!$schedule) {
             return;
         }        
-        
+
         $shortNameTeacher = $this->getCellValue($row + 2, $col);
         $teacher = Teacher::where('shortNameTeacher', $shortNameTeacher)->first();
         if ($teacher) {
@@ -84,7 +126,6 @@ class OldExcelParser extends TemplateScheduleParser
         if (!$typeDisc) {
             return false;
         }
-        
         $disc = $this->getCellValue($row + 1, $col);
         $classroom_id = static::getClassroom($this->getCellValue($row, static::nextLetter($col, 2)))['id'] ?? null;
         $time = date('H:i:s', strtotime(str_replace('-', ':', $this->getTimeCell($row, $col))));
@@ -106,7 +147,7 @@ class OldExcelParser extends TemplateScheduleParser
 
     protected function getDayAndWeekCell($row)
     {
-        $text = $this->getCellValue($row, static::DAYS_AND_WEEK_COLUMN);
+        $text = $this->getCellValue($row, $this->columns['days_and_week_column']);
         if (!$text) {
             return $this->getDayAndWeekCell($row - 1);
         }
@@ -119,7 +160,7 @@ class OldExcelParser extends TemplateScheduleParser
 
         $matches = [];
         preg_match('/(\w+)\s+\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
-        if (mb_stripos($matches[0], 'вс') !== false){
+        if (!isset($matches[1])){
             return [static::WEEK["вс"], static::FIRST_WEEK];
         }
         $day = static::WEEK[$matches[1]];
