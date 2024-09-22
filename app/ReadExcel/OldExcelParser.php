@@ -116,9 +116,10 @@ class OldExcelParser extends TemplateScheduleParser
         //     $week = static::WEEK[mb_substr(trim($array[0]), 0, 2)];
         //     return [$week, static::FIRST_WEEK];
         // }
+
         $matches = [];
-        preg_match('/(\w+)\s\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
-        if (!isset($matches[1])){
+        preg_match('/(\w+)\s+\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
+        if (mb_stripos($matches[0], 'вс') !== false){
             return [static::WEEK["вс"], static::FIRST_WEEK];
         }
         $day = static::WEEK[$matches[1]];
