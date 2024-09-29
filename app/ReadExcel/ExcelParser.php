@@ -40,6 +40,13 @@ class ExcelParser extends TemplateScheduleParser
      */
     const DISCIPLINE_COLUMNS_INDEXES = ['F', 'K'];
 
+    protected $fileName;
+
+    public function __construct($fileName)
+    {
+        $this->fileName = $fileName;
+    }
+
     public function processSheet(Worksheet $sheet)
     {
         $this->sheet = $sheet;

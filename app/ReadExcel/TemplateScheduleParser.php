@@ -77,7 +77,14 @@ abstract class TemplateScheduleParser
         $array = array_unique(explode("\n", $text));        
         return $all ? $array : ($array[0] ?? $text);
     }
-
+    
+    /**
+     * Получает значение ячейки.
+     *
+     * @param int|string $row Номер строки
+     * @param string $col Буква столбца
+     * @return string Значение ячейки
+     */
     protected function getCellValue($row, $col)
     {
         return $this->sheet->getCell($col . $row)->getValue();

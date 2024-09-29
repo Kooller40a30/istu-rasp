@@ -22,8 +22,8 @@ class TemplateExcelReader
         $spreadsheet = $reader->load($path);
         $sheets = $spreadsheet->getAllSheets();
 
-        $oldParser = new OldExcelParser();
-        $parser = new ExcelParser();
+        $oldParser = new OldExcelParser(basename($path)); // Передаем имя файла в парсер. Впредь от этого стоит избавиться
+        $parser = new ExcelParser(basename($path));       // т.к. это не его ответственность, try-catch в идеале надо вызывать тут
 
         foreach ($sheets as $n => $sheet) {
             // костыль с if-ами
