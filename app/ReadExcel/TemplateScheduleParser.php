@@ -5,96 +5,144 @@ namespace App\ReadExcel;
 use App\Models\Classroom;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+/**
+ * Абстрактный парсер расписания на основе шаблона Excel.
+ */
 abstract class TemplateScheduleParser 
 {
     /**
-     * Строка с группами
-     * @var integer
+     * Номер строки, содержащей группы.
+     *
+     * @var int
      */
-    const GROUP_ROW = 2;
+    const INDEX_GROUPS_ROW = 2;
 
     /**
-     * Неделя над чертой
+     * Номер первой недели (верхняя строка).
      */
-    const FIRST_WEEK = 1;
+    const FIRST_WEEK_NUMBER = 1;
 
     /**
-     * Неделя под чертой
+     * Номер второй недели (нижняя строка).
      */
-    const SECOND_WEEK = 2;
+    const SECOND_WEEK_NUMBER = 2;
 
     /**
-     * Регулярное выражение для поиска аудитории
+     * Регулярное выражение для поиска номера аудитории.
+     *
      * @var string
      */
-    const SEARCH_CLASSROOM_PATTERN = '/\d+\-\d+\w*/ui';
+    const REGEX_CLASSROOM_PATTERN = '/\d+\-\d+\w*/ui';
 
     /**
-     * Неделя
+     * Ассоциативный массив дней недели с их номерами.
+     *
+     * @var array
      */
-    const WEEK = [
+    const DAYS_OF_WEEK = [
         'ПОНЕДЕЛЬНИК' => 1,
-        'ВТОРНИК' => 2,
-        'СРЕДА' => 3,
-        'ЧЕТВЕРГ' => 4,
-        'ПЯТНИЦА' => 5,
-        'СУББОТА' => 6,
-        'пн' => 1,
-        'вт' => 2,
-        'ср' => 3,
-        'чт' => 4,
-        'пт' => 5,
-        'сб' => 6,
-        'вс' => 7,
+        'ВТОРНИК'     => 2,
+        'СРЕДА'       => 3,
+        'ЧЕТВЕРГ'     => 4,
+        'ПЯТНИЦА'     => 5,
+        'СУББОТА'     => 6,
+        'пн'          => 1,
+        'вт'          => 2,
+        'ср'          => 3,
+        'чт'          => 4,
+        'пт'          => 5,
+        'сб'          => 6,
+        'вс'          => 7,
     ];
 
     /**
-     * Не день недели
+     * Значение, указывающее, что строка не соответствует дню недели.
      */
-    const NOT_DAY = -1;
+    const INVALID_DAY = -1;
 
     /**
-     * Лист Excel
+     * Лист Excel, содержащий расписание.
      *
      * @var Worksheet
      */
-    protected $sheet;
+    protected $worksheet;
 
-    abstract public function processSheet(Worksheet $sheet);
+    /**
+     * Обрабатывает лист Excel и извлекает расписание.
+     *
+     * @param Worksheet $worksheet Лист Excel для обработки.
+     * @return void
+     */
+    abstract public function processSheet(Worksheet $worksheet);
 
-    abstract protected function processSchedule(&$row, string $col);    
+    /**
+     * Обрабатывает отдельную строку расписания.
+     *
+     * @param mixed  &$row    Данные строки для обработки.
+     * @param string $column  Буква столбца.
+     * @return void
+     */
+    abstract protected function processSchedule(&$row, string $column);    
 
-    protected static function nextLetter(string $base, int $repeat = 0)
+    /**
+     * Генерирует следующую букву в алфавите с учётом повторений.
+     *
+     * @param string $base    Базовая буква.
+     * @param int    $repeat  Количество повторений.
+     * @return string         Следующая буква.
+     */
+    protected static function getNextLetter(string $base, int $repeat = 0): string
     {
         if ($repeat <= 0) {
             return $base;
         }
-        return static::nextLetter(++$base, --$repeat);
+        return static::getNextLetter(++$base, --$repeat);
     }
 
-    protected static function skipRepeats($text, $all = false)
+    /**
+     * Удаляет повторяющиеся строки из текста.
+     *
+     * @param string $text Исходный текст с разделителями строк.
+     * @param bool   $all  Если true, возвращает все уникальные строки, иначе только первую.
+     * @return array|string Массив уникальных строк или первая уникальная строка.
+     */
+    protected static function removeDuplicateLines(string $text, bool $all = false)
     {
-        $array = array_unique(explode("\n", $text));        
-        return $all ? $array : ($array[0] ?? $text);
+        $uniqueLines = array_unique(explode("\n", $text));        
+        return $all ? $uniqueLines : ($uniqueLines[0] ?? $text);
     }
     
     /**
-     * Получает значение ячейки.
+     * Получает значение ячейки на листе Excel.
      *
-     * @param int|string $row Номер строки
-     * @param string $col Буква столбца
-     * @return string Значение ячейки
+     * @param int|string $row    Номер строки.
+     * @param string     $column Буква столбца.
+     * @return mixed            Значение ячейки.
      */
-    protected function getCellValue($row, $col)
+    protected function getCellValue($row, $column)
     {
-        return $this->sheet->getCell($col . $row)->getValue();
+        return $this->worksheet->getCell($column . $row)->getValue();
     }
 
-    protected static function getClassroom(string $room = null)
+    /**
+     * Находит аудиторию по номеру.
+     *
+     * @param string|null $room Номер аудитории.
+     * @return Classroom|null  Найденная аудитория или null, если не найдена.
+     */
+    protected static function findClassroom(?string $room): ?Classroom
     {
-        $matches = [];
-        preg_match(static::SEARCH_CLASSROOM_PATTERN, $room, $matches);
-        $numberClassroom = $matches[0] ?? null;
-        return Classroom::where('numberClassroom', $numberClassroom)->first();
+        if (empty($room)) {
+            return null;
+        }
+
+        preg_match(static::REGEX_CLASSROOM_PATTERN, $room, $matches);
+        $classroomNumber = $matches[0] ?? null;
+
+        if ($classroomNumber) {
+            return Classroom::where('numberClassroom', $classroomNumber)->first();
+        }
+
+        return null;
     }
 }

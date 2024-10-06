@@ -37,9 +37,9 @@ class OldExcelParser extends TemplateScheduleParser
 
     public function processSheet(Worksheet $sheet)
     {
-        $this->sheet = $sheet;
+        $this->worksheet = $sheet;
         $this->defineColumns(); // Определяем столбцы динамически
-        $highestRow = $this->sheet->getHighestRow();
+        $highestRow = $this->worksheet->getHighestRow();
 
         for ($row = 3; $row < $highestRow; $row += static::DELTA_SCHEDULE) {
             foreach ($this->columns['group_columns'] as $colGroup) {
@@ -123,7 +123,7 @@ class OldExcelParser extends TemplateScheduleParser
                 'file' => $this->fileName,
                 'day' => $this->getDayAndWeekCell($row)[0],
                 'week' => $this->getDayAndWeekCell($row)[1],
-                'group' => $this->getCellValue(static::GROUP_ROW, $col),
+                'group' => $this->getCellValue(static::INDEX_GROUPS_ROW, $col),
                 'class' => $this->getCellValue($row, $this->nextLetter($col, 1)),
                 'value' => "Teacher not exist in database. Please, update entries"
                 // Другие необходимые поля
@@ -132,7 +132,7 @@ class OldExcelParser extends TemplateScheduleParser
         }
 
         // Проверка корректности данных группы
-        $groupName = $this->getCellValue(static::GROUP_ROW, $col);
+        $groupName = $this->getCellValue(static::INDEX_GROUPS_ROW, $col);
         if (!$this->isValidGroupFormat($groupName)) {
             ErrorService::groupDataError($groupName, [
                 'file' => $this->fileName,
@@ -194,7 +194,7 @@ class OldExcelParser extends TemplateScheduleParser
         }
 
         $disc = $this->getCellValue($row + 1, $col);
-        $classroom_id = static::getClassroom($this->getCellValue($row, static::nextLetter($col, 2)))['id'] ?? null;
+        $classroom_id = static::findClassroom($this->getCellValue($row, static::nextLetter($col, 2)))['id'] ?? null;
         $time = date('H:i:s', strtotime(str_replace('-', ':', $this->getTimeCell($row, $col))));
         $class = ClassModel::where('start_time', $time)->first()['id'] ?? null;
         $discipline_id = DisciplineService::addDiscipline($disc)->value('id');
@@ -228,11 +228,11 @@ class OldExcelParser extends TemplateScheduleParser
         $matches = [];
         preg_match('/(\w+)\s+\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
         if (!isset($matches[1])) {
-            return [static::WEEK["вс"], static::FIRST_WEEK];
+            return [static::DAYS_OF_WEEK["вс"], static::FIRST_WEEK_NUMBER];
         }
-        $day = static::WEEK[$matches[1]];
+        $day = static::DAYS_OF_WEEK[$matches[1]];
         $weekText = $matches[2] ?? 'над';
-        $week = mb_stripos($weekText, 'над', 0) !== false ? static::FIRST_WEEK : static::SECOND_WEEK;
+        $week = mb_stripos($weekText, 'над', 0) !== false ? static::FIRST_WEEK_NUMBER : static::SECOND_WEEK_NUMBER;
 
         return [$day, $week];
     }
