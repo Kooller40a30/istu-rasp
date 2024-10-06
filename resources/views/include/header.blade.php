@@ -10,6 +10,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#uploadModal">Загрузить файлы</button></li>
+                        <li><a class="dropdown-item" target="_blank" href="{{ route('renderLogs') }}">Просмотр логов</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{{ route('logout') }}">Выход</a></li>
                     </ul>

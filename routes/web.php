@@ -7,6 +7,7 @@ use App\Http\Controllers\StartController;
 use App\Http\Controllers\TeachersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UploadController;
 
@@ -65,3 +66,5 @@ Route::any('/authenticate', [LoginController::class, 'authenticate'])->name('aut
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::post('/upload_files', [UploadController::class, 'uploadFiles'])->name('upload_files');
+
+Route::get('/logs', [ErrorController::class, 'renderLogs'])->name('renderLogs');
