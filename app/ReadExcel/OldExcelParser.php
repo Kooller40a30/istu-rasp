@@ -157,6 +157,18 @@ class OldExcelParser extends TemplateScheduleParser
             }
         }
 
+        $class = $this->getCellValue($row, $this->nextLetter($col, 1));
+        if (!$this->isValidClassFormat($class)) {
+            ErrorService::classDataError($groupName, [
+                'file' => $this->fileName,
+                'day' => $this->getDayAndWeekCell($row)[0],
+                'week' => $this->getDayAndWeekCell($row)[1],
+                'class' => $class,
+                'value' => 'Invalid class format'
+            ]);
+            return;
+        }
+
         GroupScheduleService::addGroupSchedule($group, $schedule);
         TeacherScheduleService::addTeacherSchedule($teacher, $schedule);
 
@@ -176,6 +188,12 @@ class OldExcelParser extends TemplateScheduleParser
             ]);
             return;
         }*/
+    }
+
+    protected function isValidClassFormat($value): bool
+    {
+        $value = trim($value);
+        return !is_null($value) && preg_match('/^\d\d-\d\d$/', $value) === 1;
     }
 
     protected function addSchedule(&$row, string $col)

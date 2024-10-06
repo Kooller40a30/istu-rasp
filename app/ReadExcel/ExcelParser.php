@@ -49,8 +49,8 @@ class ExcelParser extends TemplateScheduleParser
 
     public function processSheet(Worksheet $sheet)
     {
-        $this->sheet = $sheet;
-        $highestRow = $this->sheet->getHighestRow();
+        $this->worksheet = $sheet;
+        $highestRow = $this->worksheet->getHighestRow();
         for ($row = 4; $row <= $highestRow; $row++) {
             foreach (static::DISCIPLINE_COLUMNS_INDEXES as $col) {
                 $this->processSchedule($row, $col);
@@ -73,7 +73,7 @@ class ExcelParser extends TemplateScheduleParser
         $this->addTeacherSchedules($teacherCol, $schedule);
         
         // связь расписания с группами
-        $group = Group::where('nameGroup', $this->getCellValue(static::GROUP_ROW, $col));
+        $group = Group::where('nameGroup', $this->getCellValue(static::INDEX_GROUPS_ROW, $col));
         if ($group->first()) {
             GroupScheduleService::addGroupSchedule($group->first(), $schedule);
         } else {
@@ -98,17 +98,17 @@ class ExcelParser extends TemplateScheduleParser
 
     protected function addSchedule($row, string $col, string $discipline)
     {    
-        $shortNameTypeDisc = static::skipRepeats($this->getCellValue($row, static::nextLetter($col, 1)));     
+        $shortNameTypeDisc = static::removeDuplicateLines($this->getCellValue($row, static::nextLetter($col, 1)));     
         if (!$shortNameTypeDisc){
             return false;    
         }
-        $classroom = static::getClassroom($this->getCellValue($row, static::nextLetter($col, 3)));
+        $classroom = static::findClassroom($this->getCellValue($row, static::nextLetter($col, 3)));
 
         $attributes = [
-            'day' => static::WEEK[$this->getCellValue($row - (($row - 4) % 14), static::DAY_COLUMN_INDEX)] ?? static::NOT_DAY,
-            'week' => $row % 2 == 0 ? static::FIRST_WEEK : static::SECOND_WEEK,
+            'day' => static::DAYS_OF_WEEK[$this->getCellValue($row - (($row - 4) % 14), static::DAY_COLUMN_INDEX)] ?? static::INVALID_DAY,
+            'week' => $row % 2 == 0 ? static::FIRST_WEEK_NUMBER : static::SECOND_WEEK_NUMBER,
             'class' => $this->getCellValue($row % 2 == 0 ? $row : $row - 1, static::CLASS_NUMBER_COLUMN_INDEX),
-            'discipline_id' => DisciplineService::addDiscipline(static::skipRepeats($discipline))->value('id'),
+            'discipline_id' => DisciplineService::addDiscipline(static::removeDuplicateLines($discipline))->value('id'),
             'classroom_id' => $classroom ? $classroom['id'] : $classroom,
             'type_discipline_id' => TypeDisciplineService::addTypeDiscipline($shortNameTypeDisc)->value('id'),
         ];

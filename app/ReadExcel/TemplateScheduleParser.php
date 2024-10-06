@@ -8,7 +8,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 /**
  * Абстрактный парсер расписания на основе шаблона Excel.
  */
-abstract class TemplateScheduleParser 
+abstract class TemplateScheduleParser
 {
     /**
      * Номер строки, содержащей группы.
@@ -82,7 +82,7 @@ abstract class TemplateScheduleParser
      * @param string $column  Буква столбца.
      * @return void
      */
-    abstract protected function processSchedule(&$row, string $column);    
+    abstract protected function processSchedule(&$row, string $column);
 
     /**
      * Генерирует следующую букву в алфавите с учётом повторений.
@@ -108,10 +108,10 @@ abstract class TemplateScheduleParser
      */
     protected static function removeDuplicateLines(string $text, bool $all = false)
     {
-        $uniqueLines = array_unique(explode("\n", $text));        
+        $uniqueLines = array_unique(explode("\n", $text));
         return $all ? $uniqueLines : ($uniqueLines[0] ?? $text);
     }
-    
+
     /**
      * Получает значение ячейки на листе Excel.
      *
@@ -144,5 +144,19 @@ abstract class TemplateScheduleParser
         }
 
         return null;
+    }
+
+    /**
+     * Возвращает следующую букву столбца с заданным смещением.
+     *
+     * @param string $col Текущая буква столбца
+     * @param int $offset Смещение
+     * @return string Следующая буква столбца
+     */
+    protected static function nextLetter($col, $offset = 1)
+    {
+        $num = ord($col) - 64; // 'A' => 1
+        $num += $offset;
+        return chr($num + 64);
     }
 }

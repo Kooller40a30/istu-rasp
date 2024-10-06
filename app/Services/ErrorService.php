@@ -36,12 +36,13 @@ class ErrorService
                     throw new Exception("Поле '{$field}' обязательно для заполнения.");
                 }
             }
-    
+            
             return Error::create($errorData);
             
         } catch (Exception $e) {
             if ($logToSystem) {
                 // Логирование только сообщения исключения и первого предыдущего, если есть
+                Log::debug('Data before inserting into database:', $errorData);
                 $logMessage = 'Не удалось записать ошибку: ' . $e->getMessage();
                 if ($e->getPrevious()) {
                     $logMessage .= ' | Предыдущее исключение: ' . $e->getPrevious()->getMessage();
