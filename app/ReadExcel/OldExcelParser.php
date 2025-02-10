@@ -10,9 +10,9 @@ use App\Services\GroupScheduleService;
 use App\Services\ScheduleService;
 use App\Services\TeacherScheduleService;
 use App\Services\TypeDisciplineService;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Services\ErrorService;
-use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Support\Facades\Log;
 
 class OldExcelParser extends TemplateScheduleParser
 {
@@ -41,7 +41,10 @@ class OldExcelParser extends TemplateScheduleParser
         $this->defineColumns(); // Определяем столбцы динамически
         $highestRow = $this->worksheet->getHighestRow();
 
+        Log::info("Начало обработки файла {$this->fileName}. Всего строк: {$highestRow}");
+
         for ($row = 3; $row < $highestRow; $row += static::DELTA_SCHEDULE) {
+            Log::info("Обработка строки: {$row}");
             foreach ($this->columns['group_columns'] as $colGroup) {
                 $this->processSchedule($row, $colGroup);
             }
@@ -56,6 +59,7 @@ class OldExcelParser extends TemplateScheduleParser
         // Логика для определения динамических столбцов
         $this->columns['group_columns'] = $this->findGroupColumns();
         $this->columns['days_and_week_column'] = $this->findDaysAndWeekColumn();
+        Log::info("Определены столбцы: " . json_encode($this->columns));
     }
 
     protected function findGroupColumns()
@@ -72,15 +76,6 @@ class OldExcelParser extends TemplateScheduleParser
 
         return $columns;
     }
-
-    /*
-    protected function isValidTeacherFormat(string $shortName): bool
-    {
-        // Пример проверки: Фамилия И.О.
-        return preg_match('/^[А-ЯЁ][а-яё]+\s[А-ЯЁ]\.[А-ЯЁ]\.$/u', $shortName) === 1;
-    }
-        неактуально, т.к. есть нестандартные фио
-    */
 
     /**
      * Проверяет, соответствует ли строка корректному формату группы.
@@ -111,22 +106,25 @@ class OldExcelParser extends TemplateScheduleParser
 
     protected function processSchedule(&$row, string $col)
     {
+        Log::info("Начало обработки расписания. Строка: {$row}, Колонка: {$col}");
         $schedule = $this->addSchedule($row, $col);
         if (!$schedule) {
+            Log::warning("Расписание не найдено или не создано для строки {$row}, колонки {$col}");
             return;
         }
+
         // Проверка корректности данных преподавателя
         $shortNameTeacher = $this->getCellValue($row + 2, $col);
         $teacher = Teacher::where('shortNameTeacher', $shortNameTeacher)->first();
         if (!$teacher) {
+            Log::error("Преподаватель не найден: {$shortNameTeacher} в файле {$this->fileName} на строке {$row}");
             ErrorService::teacherDataError($shortNameTeacher, [
-                'file' => $this->fileName,
-                'day' => $this->getDayAndWeekCell($row)[0],
-                'week' => $this->getDayAndWeekCell($row)[1],
-                'group' => $this->getCellValue(static::INDEX_GROUPS_ROW, $col),
-                'class' => $this->getCellValue($row, $this->nextLetter($col, 1)),
-                'value' => "Teacher not exist in database. Please, update entries"
-                // Другие необходимые поля
+                'file'   => $this->fileName,
+                'day'    => $this->getDayAndWeekCell($row)[0],
+                'week'   => $this->getDayAndWeekCell($row)[1],
+                'group'  => $this->getCellValue(static::INDEX_GROUPS_ROW, $col),
+                'class'  => $this->getCellValue($row, $this->nextLetter($col, 1)),
+                'value'  => "Teacher not exist in database. Please, update entries"
             ]);
             return;
         }
@@ -134,66 +132,34 @@ class OldExcelParser extends TemplateScheduleParser
         // Проверка корректности данных группы
         $groupName = $this->getCellValue(static::INDEX_GROUPS_ROW, $col);
         if (!$this->isValidGroupFormat($groupName)) {
+            Log::error("Неверный формат группы: {$groupName} в файле {$this->fileName} на строке {$row}");
             ErrorService::groupDataError($groupName, [
-                'file' => $this->fileName,
-                'day' => $this->getDayAndWeekCell($row)[0],
-                'week' => $this->getDayAndWeekCell($row)[1],
-                'class' => $this->getCellValue($row, $this->nextLetter($col, 1)),
-                'value' => 'Invalid group data format'
-                // Другие необходимые поля
+                'file'   => $this->fileName,
+                'day'    => $this->getDayAndWeekCell($row)[0],
+                'week'   => $this->getDayAndWeekCell($row)[1],
+                'class'  => $this->getCellValue($row, $this->nextLetter($col, 1)),
+                'value'  => 'Invalid group data format'
             ]);
             return;
         } else {
             $group = Group::where('nameGroup', $groupName)->first();
             if (!$group) {
+                Log::error("Группа не найдена в базе: {$groupName} в файле {$this->fileName} на строке {$row}");
                 ErrorService::groupDataError($groupName, [
-                    'file' => $this->fileName,
-                    'day' => $this->getDayAndWeekCell($row)[0],
-                    'week' => $this->getDayAndWeekCell($row)[1],
-                    'class' => $this->getCellValue($row, $this->nextLetter($col, 1)),
-                    'value' => "Group not exist in database. Please, update entries"
+                    'file'   => $this->fileName,
+                    'day'    => $this->getDayAndWeekCell($row)[0],
+                    'week'   => $this->getDayAndWeekCell($row)[1],
+                    'class'  => $this->getCellValue($row, $this->nextLetter($col, 1)),
+                    'value'  => "Group not exist in database. Please, update entries"
                 ]);
                 return;
             }
         }
 
-        $class = $this->getCellValue($row, $this->nextLetter($col, 1));
-        if (!$this->isValidClassFormat($class)) {
-            ErrorService::classDataError($groupName, [
-                'file' => $this->fileName,
-                'day' => $this->getDayAndWeekCell($row)[0],
-                'week' => $this->getDayAndWeekCell($row)[1],
-                'class' => $class,
-                'value' => 'Invalid class format'
-            ]);
-            return;
-        }
-
+        // Привязываем расписание к группе и преподавателю
         GroupScheduleService::addGroupSchedule($group, $schedule);
         TeacherScheduleService::addTeacherSchedule($teacher, $schedule);
-
-        /*// Проверка корректности данных преподавателя
-        $class = $this->getCellValue($row + 2, $col);
-        $teacher = Teacher::where('shortNameTeacher', $shortNameTeacher)->first();
-        if ($teacher) {
-            TeacherScheduleService::addTeacherSchedule($teacher, $schedule);
-        } else {
-            ErrorService::teacherDataError($shortNameTeacher, [
-                'file' => $this->fileName,
-                'day' => $this->getDayAndWeekCell($row)[0],
-                'week' => $this->getDayAndWeekCell($row)[1],
-                'group' => $this->getCellValue(static::GROUP_ROW, $col),
-                'value' => 'Teacher not exist in database. Please, update entries'
-                // Другие необходимые поля
-            ]);
-            return;
-        }*/
-    }
-
-    protected function isValidClassFormat($value): bool
-    {
-        $value = trim($value);
-        return !is_null($value) && preg_match('/^\d\d-\d\d$/', $value) === 1;
+        Log::info("Расписание успешно добавлено для группы {$groupName} и преподавателя {$shortNameTeacher}.");
     }
 
     protected function addSchedule(&$row, string $col)
@@ -202,29 +168,34 @@ class OldExcelParser extends TemplateScheduleParser
         list($day, $week) = $dayAndWeek;
 
         if ($day == static::WEEKEND) {
+            Log::info("Пропуск расписания: выходной день (вс) на строке {$row}");
             $row++;
             return false;
         }
 
         $typeDisc = $this->getCellValue($row, $col);
         if (!$typeDisc) {
+            Log::warning("Пустой тип дисциплины на строке {$row}, колонке {$col}");
             return false;
         }
 
         $disc = $this->getCellValue($row + 1, $col);
-        $classroom_id = static::findClassroom($this->getCellValue($row, static::nextLetter($col, 2)))['id'] ?? null;
+        $classroomData = static::findClassroom($this->getCellValue($row, static::nextLetter($col, 2)));
+        $classroom_id = $classroomData['id'] ?? null;
         $time = date('H:i:s', strtotime(str_replace('-', ':', $this->getTimeCell($row, $col))));
         $class = ClassModel::where('start_time', $time)->first()['id'] ?? null;
         $discipline_id = DisciplineService::addDiscipline($disc)->value('id');
         $type_discipline_id = TypeDisciplineService::addTypeDiscipline($typeDisc)->value('id');
 
+        Log::info("Добавление расписания: день {$day}, неделя {$week}, время {$time}, дисциплина {$disc}");
+
         return ScheduleService::addSchedule([
-            'day' => $day,
-            'week' => $week,
-            'class' => $class,
-            'discipline_id' => $discipline_id,
-            'classroom_id' => $classroom_id,
-            'type_discipline_id' => $type_discipline_id,
+            'day'               => $day,
+            'week'              => $week,
+            'class'             => $class,
+            'discipline_id'     => $discipline_id,
+            'classroom_id'      => $classroom_id,
+            'type_discipline_id'=> $type_discipline_id,
         ]);
     }
 
@@ -246,12 +217,14 @@ class OldExcelParser extends TemplateScheduleParser
         $matches = [];
         preg_match('/(\w+)\s+\(?(\w+)\)?/ui', $dayAndWeekText, $matches);
         if (!isset($matches[1])) {
+            Log::warning("Не удалось определить день недели на строке {$row}. Используем значения по умолчанию.");
             return [static::DAYS_OF_WEEK["вс"], static::FIRST_WEEK_NUMBER];
         }
         $day = static::DAYS_OF_WEEK[$matches[1]];
         $weekText = $matches[2] ?? 'над';
         $week = mb_stripos($weekText, 'над', 0) !== false ? static::FIRST_WEEK_NUMBER : static::SECOND_WEEK_NUMBER;
 
+        Log::info("Определены день: {$day}, неделя: {$week} для строки {$row}");
         return [$day, $week];
     }
 
