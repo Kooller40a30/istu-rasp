@@ -3,22 +3,41 @@
 namespace App\Services\GetFromDatabase;
 
 use App\Models\Classroom;
-use App\Models\Faculty;
-use App\Models\Teacher;
+use Illuminate\Database\Eloquent\Collection;
 
-class GetClassrooms{
-
-    public static function classrooms(int $faculty_id = 0, int $department_id = 0)
+/**
+ * Репозиторий для работы с аудиториями.
+ *
+ * Предоставляет методы для получения данных об аудиториях из базы данных.
+ */
+class GetClassrooms
+{
+    /**
+     * Получает список аудиторий с опциональной фильтрацией по факультету и кафедре.
+     *
+     * @param int $facultyId Идентификатор факультета для фильтрации (0 - без фильтрации).
+     * @param int $departmentId Идентификатор кафедры для фильтрации (0 - без фильтрации).
+     * @return Collection|Classroom[] Коллекция объектов Classroom.
+     */
+    public static function findAll(int $facultyId = 0, int $departmentId = 0): Collection
     {
-        $model = Classroom::select('classrooms.id','numberClassroom','classrooms.faculty_id','classrooms.department_id');
-        if ($faculty_id > 0) {
-            $model->where('faculty_id', $faculty_id);
+        $query = Classroom::select(
+            'classrooms.id',
+            'numberClassroom',
+            'classrooms.faculty_id',
+            'classrooms.department_id'
+        );
+
+        if ($facultyId > 0) {
+            $query->where('classrooms.faculty_id', $facultyId);
         }
-        if ($department_id > 0) {
-            $model->where('department_id', $department_id);
+
+        if ($departmentId > 0) {
+            $query->where('classrooms.department_id', $departmentId);
         }
-        return $model->join('schedules','classrooms.id','=','schedules.classroom_id')
-            ->groupBy('classrooms.id','numberClassroom')
+
+        return $query->join('schedules', 'classrooms.id', '=', 'schedules.classroom_id')
+            ->groupBy('classrooms.id', 'numberClassroom')
             ->orderBy('numberClassroom')
             ->get();
     }

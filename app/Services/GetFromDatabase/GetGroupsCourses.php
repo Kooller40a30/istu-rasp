@@ -3,14 +3,24 @@
 namespace App\Services\GetFromDatabase;
 
 use App\Models\Group;
+use Illuminate\Database\Eloquent\Collection;
 
-class GetGroupsCourses{
-
-    public static function courses($faculty_id)
+/**
+ * Репозиторий для получения курсов групп.
+ */
+class GetGroupsCourses
+{
+    /**
+     * Получает уникальные курсы для указанного факультета.
+     *
+     * @param int $facultyId Идентификатор факультета.
+     * @return Collection|Group[] Коллекция объектов, содержащих поля faculty_id и course_id.
+     */
+    public static function findCoursesByFaculty(int $facultyId): Collection
     {
-        return Group::groupBy('faculty_id','course_id')
-            ->having('faculty_id','=',$faculty_id)
-            ->select('faculty_id','course_id')
+        return Group::select('faculty_id', 'course_id')
+            ->where('faculty_id', $facultyId)
+            ->groupBy('faculty_id', 'course_id')
             ->get();
     }
 }

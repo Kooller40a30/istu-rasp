@@ -3,40 +3,43 @@
 namespace App\Services\GetFromDatabase;
 
 use App\Models\Group;
+use Illuminate\Database\Eloquent\Collection;
 
-class GetGroups 
+/**
+ * Репозиторий для работы с группами.
+ */
+class GetGroups
 {
     /**
-     * Перечень групп
+     * Получает перечень групп с опциональной фильтрацией по факультету и курсу.
      *
-     * @param integer $faculty факультет
-     * @param integer $course курс
-     * @return array
+     * @param int $faculty Идентификатор факультета (0 - без фильтрации).
+     * @param int $course  Номер курса (0 - без фильтрации).
+     * @return Collection|Group[] Коллекция объектов Group.
      */
-    public static function groups(int $faculty = 0, int $course = 0)
+    public static function findGroups(int $faculty = 0, int $course = 0): Collection
     {
-        $builder = Group::select('id', 'nameGroup')
-            ->where(function($query) use ($faculty, $course){
-                if ($faculty) {
-                    $query->where("faculty_id", $faculty);
-                }
-                if ($course) {
-                    $query->where("course_id", $course);
-                }
-            });
-        return $builder->get();
+        return Group::select('id', 'nameGroup')
+            ->when($faculty, function ($query, $faculty) {
+                $query->where('faculty_id', $faculty);
+            })
+            ->when($course, function ($query, $course) {
+                $query->where('course_id', $course);
+            })
+            ->get();
     }
 
     /**
-     * Перечень курсов
+     * Получает перечень курсов для указанного факультета.
      *
-     * @param integer $faculty факультет
-     * @return array
+     * @param int $faculty Идентификатор факультета.
+     * @return Collection|Group[] Коллекция объектов с уникальными значениями курса.
      */
-    public static function courses(int $faculty) 
+    public static function findCourses(int $faculty): Collection
     {
-        return Group::select('distinct course')
+        return Group::select('course')
             ->where('faculty_id', $faculty)
+            ->distinct()
             ->orderBy('course')
             ->get();
     }

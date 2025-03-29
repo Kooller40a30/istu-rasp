@@ -26,9 +26,9 @@ class ClassroomsController extends Controller
     public function getAllClassrooms(){
         //Storage::deleteDirectory('publiс/schedule');
         //Storage::createDirectory('public/schedule');
-        $faculties = GetFaculties::facultiesToClassrooms();
-        $departments = GetDepartments::classroomsDepartments();
-        $classrooms = GetClassrooms::classrooms();
+        $faculties = GetFaculties::findFacultiesForClassrooms();
+        $departments = GetDepartments::findClassroomsDepartments();
+        $classrooms = GetClassrooms::findAll();
         $faculty_id = -1;
         $department_id = -1;
         $classroom_id = -1;
@@ -42,10 +42,10 @@ class ClassroomsController extends Controller
             $path = CreateExcelFiles::createFacultyClassroomsExcel($faculty_id);
             return response()->download($path);
         } elseif(isset($_POST['departments'])) {
-            $faculties = GetFaculties::facultiesToClassrooms();
+            $faculties = GetFaculties::findFacultiesForClassrooms();
             //$departments = GetDepartments::departmentsFacultyToClassrooms($faculty_id);
-            $departments = GetDepartments::classroomsDepartments($faculty_id);
-            $classrooms = GetClassrooms::classrooms($faculty_id);
+            $departments = GetDepartments::findClassroomsDepartments($faculty_id);
+            $classrooms = GetClassrooms::findAll($faculty_id);
             $department_id = -1;
             $classroom_id = -1;
             return view('classrooms_schedule',compact('faculties','departments','classrooms','faculty_id','department_id','classroom_id'));
@@ -65,10 +65,10 @@ class ClassroomsController extends Controller
             return response()->download($paths[0]);
         } else {
             //$faculty_id = Department::find($department_id)->getFaculty->id;
-            $classrooms = GetClassrooms::classrooms($faculty_id, $department_id);
-            $faculties = GetFaculties::facultiesToClassrooms();
+            $classrooms = GetClassrooms::findAll($faculty_id, $department_id);
+            $faculties = GetFaculties::findFacultiesForClassrooms();
             //$departments = GetDepartments::departmentsFacultyToClassrooms($faculty_id);
-            $departments = GetDepartments::classroomsDepartments($faculty_id);
+            $departments = GetDepartments::findClassroomsDepartments($faculty_id);
             $classroom_id = -1;
             if (isset($_POST['classrooms'])) {
                 return response()->view('classrooms_schedule', compact('faculties', 'departments', 'classrooms', 'faculty_id', 'department_id','classroom_id'));
@@ -99,9 +99,9 @@ class ClassroomsController extends Controller
             $department_id = $classroom[2];
             $faculty_id = $classroom[1];
 
-            $faculties = GetFaculties::facultiesToClassrooms();
-            $departments = GetDepartments::classroomsDepartments($faculty_id);
-            $classrooms = GetClassrooms::classrooms($faculty_id,$department_id);
+            $faculties = GetFaculties::findFacultiesForClassrooms();
+            $departments = GetDepartments::findClassroomsDepartments($faculty_id);
+            $classrooms = GetClassrooms::findAll($faculty_id,$department_id);
             $paths = CreateExcelFiles::createClassroomExcel($classroom_id);
             $html = $paths[1];
             $classroomName = Classroom::where('id',$classroom_id)->value('numberClassroom');
@@ -134,23 +134,27 @@ class ClassroomsController extends Controller
 
     public function loadClassroomSchedule(Request $request) 
     {
-        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
-        $dep_id = (int)$request->query('department', 0);
-        if ($dep_id == Department::NOT_VALID_ID) {
-            $dep = new Department(['id' => null]);
-        } else {
-            $dep = Department::where('id', '=', $dep_id)->first();
-        }
-        $classroom = Classroom::where('id', '=', (int)$request->query('classroom', 0))->first();
-        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
-        $depName = $dep['nameDepartment'] ?? 'Все кафедры';
-        $classroomName = $classroom['numberClassroom'] ?? 'Все аудитории';
+        $facultyId   = (int) $request->query('faculty', 0);
+        $depId       = (int) $request->query('department', 0);
+        $classroomId = (int) $request->query('classroom', 0);
+    
+        $faculty    = $facultyId   ? Faculty::find($facultyId)    : null;
+        $dep        = $depId       ? Department::find($depId)     : null;
+        $classroom  = $classroomId ? Classroom::find($classroomId): null;
+    
+        $facultyName    = $faculty?->shortNameFaculty     ?? 'Все институты';
+        $depName        = $dep?->nameDepartment           ?? 'Все кафедры';
+        $classroomName  = $classroom?->numberClassroom    ?? 'Все аудитории';
+    
         $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Аудитория: {$classroomName}";
+    
         if ($classroom) {
             $result = ClassroomScheduleHelper::generateSchedule($classroom->schedules(), $classroomName, true);
         } else {
             $result = ClassroomScheduleHelper::generateClassroomSchedules($faculty, $dep);
         }
+    
         return response()->view('result_schedule', compact('result', 'header'));
     }
+    
 }

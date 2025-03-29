@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 use App\Models\ClassModel;
 use App\Models\Schedule;
-use App\Services\GetFromDatabase\ScheduleRepository;
+use App\Services\GetFromDatabase\GetSchedule;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Enumerable;
@@ -131,8 +131,8 @@ abstract class ScheduleHelper
     public static function generateSchedule($schedules, string $name) : string
     {
         $countRowsDays = 6;
-        $firstSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::FIRST_WEEK);
-        $secondSchedules = ScheduleRepository::sortSchedules(clone $schedules, self::SECOND_WEEK);
+        $firstSchedules = GetSchedule::getSortedSchedulesForWeek(clone $schedules, self::FIRST_WEEK);
+        $secondSchedules = GetSchedule::getSortedSchedulesForWeek(clone $schedules, self::SECOND_WEEK);
         $html = self::colgroup(false, $countRowsDays);
         $html .= self::createHeaderTable($name) . '<tbody>';        
         $classes = ClassModel::orderBy('id')->get();

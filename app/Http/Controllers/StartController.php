@@ -6,7 +6,7 @@ use App\Models\Classroom;
 use App\Models\Department;
 use App\Models\Teacher;
 use App\Services\FileService;
-use App\Services\GetFromDatabase\CoursesRepository;
+use App\Services\GetFromDatabase\GetCourses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -27,11 +27,11 @@ class StartController extends Controller
                 Storage::delete($file);
             }
         });
-        $facultiesGroup = GetFaculties::facultiesToGroups();
-        $facultiesTeacher = GetFaculties::facultiesToTeachers();
-        $facultiesRoom = GetFaculties::facultiesToClassrooms();
-        $courses = CoursesRepository::findAll();
-        $groups = GetGroups::groups();
+        $facultiesGroup = GetFaculties::findFacultiesForGroups();
+        $facultiesTeacher = GetFaculties::findFacultiesForTeachers();
+        $facultiesRoom = GetFaculties::findFacultiesForClassrooms();
+        $courses = GetCourses::findAll();
+        $groups = GetGroups::findGroups();
         $deps = Department::get();
         $teachers = Teacher::get();
         $classrooms = Classroom::get();

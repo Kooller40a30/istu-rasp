@@ -20,9 +20,9 @@ class TeachersController extends Controller
     public function getAllTeachers(){
         //Storage::deleteDirectory('public/schedule');
         //Storage::createDirectory('public/schedule');
-        $faculties = GetFaculties::facultiesToTeachers();
-        $departments = GetDepartments::teachersDepartments();
-        $teachers = GetTeachers::teachers();
+        $faculties = GetFaculties::findFacultiesForTeachers();
+        $departments = GetDepartments::findTeachersDepartments();
+        $teachers = GetTeachers::findTeachers();
         $faculty_id = 0;
         $department_id = 0;
         $teacher_id = 0;
@@ -37,9 +37,9 @@ class TeachersController extends Controller
             return response()->download($path);
 
         } elseif(isset($_POST['departments'])) {
-            $faculties = GetFaculties::facultiesToTeachers();
-            $departments = GetDepartments::teachersDepartments($faculty_id);
-            $teachers = GetTeachers::teachers($faculty_id);
+            $faculties = GetFaculties::findFacultiesForTeachers();
+            $departments = GetDepartments::findTeachersDepartments($faculty_id);
+            $teachers = GetTeachers::findTeachers($faculty_id);
             $department_id = 0;
             $teacher_id = 0;
             return view('teachers_schedule',compact('faculties','departments','teachers','faculty_id','department_id','teacher_id'));
@@ -55,9 +55,9 @@ class TeachersController extends Controller
             return response()->download($paths[0]);
         } else {
             $faculty_id = Department::find($department_id)->getFaculty->id;
-            $teachers = GetTeachers::teachers($faculty_id, $department_id);
-            $faculties = GetFaculties::facultiesToTeachers();
-            $departments = GetDepartments::teachersDepartments($faculty_id);
+            $teachers = GetTeachers::findTeachers($faculty_id, $department_id);
+            $faculties = GetFaculties::findFacultiesForTeachers();
+            $departments = GetDepartments::findTeachersDepartments($faculty_id);
             $teacher_id = 0;
             if (isset($_POST['teachers'])) {
                 return response()->view('teachers_schedule', compact('faculties', 'departments', 'teachers', 'faculty_id', 'department_id', 'teacher_id'));
@@ -87,9 +87,9 @@ class TeachersController extends Controller
                 $department_id = $departments[0]['id'];
                 $faculty_id = Department::where('id',$department_id)->value('faculty_id');
             }
-            $faculties = GetFaculties::facultiesToTeachers();
-            //$departments = GetDepartments::teachersDepartments();
-            $teachers = GetTeachers::teachers();
+            $faculties = GetFaculties::findFacultiesForTeachers();
+            //$departments = GetDepartments::findTeachersDepartments();
+            $teachers = GetTeachers::findTeachers();
             $paths = CreateExcelFiles::createTeacherExcel($teacher_id);
             $html = $paths[1];
             $teacherName = Teacher::where('id',$teacher_id)->value('shortNameTeacher');
@@ -102,7 +102,7 @@ class TeachersController extends Controller
     {
         $faculty_id = (int)$request->query('faculty');
         $dep_id = (int)$request->query('dep');
-        $teachers = GetTeachers::teachers($faculty_id, $dep_id);
+        $teachers = GetTeachers::findTeachers($faculty_id, $dep_id);
         $html = '<option value="">Все преподаватели</option>';
         foreach ($teachers as $teacher) {
             $id = $teacher['id'];
@@ -114,18 +114,27 @@ class TeachersController extends Controller
 
     public function loadTeacherSchedule(Request $request)
     {
-        $faculty = Faculty::where('id', '=', (int)$request->query('faculty', 0))->first();
-        $dep = Department::where('id', '=', (int)$request->query('department', 0))->first();
-        $teacher = Teacher::where('id', '=', (int)$request->query('teacher', 0))->first();
-        $facultyName = $faculty['shortNameFaculty'] ?? 'Все институты';
-        $depName = $course['nameDepartment'] ?? 'Все кафедры';
-        $teacherName = $teacher['shortNameTeacher'] ?? 'Все преподаватели';
+        $facultyId = (int) $request->query('faculty', 0);
+        $depId     = (int) $request->query('department', 0);
+        $teacherId = (int) $request->query('teacher', 0);
+    
+        $faculty = $facultyId ? Faculty::find($facultyId) : null;
+        $dep     = $depId     ? Department::find($depId)   : null;
+        $teacher = $teacherId ? Teacher::find($teacherId)  : null;
+    
+        $facultyName  = $faculty?->shortNameFaculty  ?? 'Все институты';
+        $depName      = $dep?->nameDepartment        ?? 'Все кафедры';
+        $teacherName  = $teacher?->shortNameTeacher  ?? 'Все преподаватели';
+    
         $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
+    
         if ($teacher) {
             $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName);
         } else {
             $result = TeacherScheduleHelper::generateTeachersSchedule($faculty, $dep);
         }
+    
         return response()->view('result_schedule', compact('result', 'header'));
     }
+    
 }

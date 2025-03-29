@@ -6,7 +6,7 @@ use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Schedule;
 use App\Services\ClassroomService;
-use App\Services\GetFromDatabase\ScheduleRepository;
+use App\Services\GetFromDatabase\GetSchedule;
 
 class ClassroomScheduleHelper extends ScheduleHelper
 {
@@ -27,18 +27,30 @@ class ClassroomScheduleHelper extends ScheduleHelper
     public static function generateClassroomSchedules(Faculty $faculty = null, Department $department = null)
     {
         $classrooms = ClassroomService::filterClassrooms($department, $faculty);
+    
         $titlesCollect = collect();
         $schedules = collect();
+    
         foreach ($classrooms as $classroom) {
-            if (!$titlesCollect->contains($classroom['numberClassroom'])) {
-                $titlesCollect[] = $classroom['numberClassroom'];
+            $title = $classroom->numberClassroom;
+            if ($title && !$titlesCollect->contains($title)) {
+                $titlesCollect[] = $title;
             }
-            foreach ($classroom->schedules as $schedule) {
-                $schedules[] = $schedule;
+    
+            foreach ($classroom->schedules ?? [] as $schedule) {
+                if ($schedule) {
+                    $schedules[] = $schedule;
+                }
             }
         }
-        $titles = $titlesCollect->all();        
-        $schedules = ScheduleRepository::sortManySchedules($schedules);
-        return self::generateSchedules($schedules, $titles); 
+    
+        if ($schedules->isEmpty()) {
+            return '<p>Нет данных для отображения расписания.</p>';
+        }
+    
+        $schedules = GetSchedule::sortSchedulesCollection($schedules);
+    
+        return self::generateSchedules($schedules, $titlesCollect->all());
     }
+    
 }

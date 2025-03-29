@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Schedule;
-use App\Services\GetFromDatabase\ScheduleRepository;
+use App\Services\GetFromDatabase\GetSchedule;
 
 class TeacherScheduleHelper extends ScheduleHelper
 {
@@ -23,32 +23,41 @@ class TeacherScheduleHelper extends ScheduleHelper
 
     public static function generateTeachersSchedule(Faculty $faculty = null, Department $department = null) : string
     {
-        if ($faculty) {
+        if ($faculty instanceof Faculty) {
             $departments = $faculty->departments;
         } else {
-            $departments = Department::get();
+            $departments = Department::all();
         }
-        if ($department) {
-            $departments = $departments->where('id', '=', $department['id']);
+    
+        if ($department instanceof Department) {
+            $departments = $departments->where('id', $department->id);
         }
-        $departmentsTeachers = $departments->map(function($dep) {
-            return $dep->teachers;
-        });
+    
         $titlesCollect = collect();
         $schedules = collect();
-        foreach ($departmentsTeachers as $dep => $teachers) {
-            foreach ($teachers as $teacher) {
-                if (!$titlesCollect->contains($teacher['shortNameTeacher'])) {
-                    $titlesCollect[] = $teacher['shortNameTeacher'];
+    
+        foreach ($departments as $dep) {
+            foreach ($dep->teachers as $teacher) {
+                $name = $teacher->shortNameTeacher;
+                if ($name && !$titlesCollect->contains($name)) {
+                    $titlesCollect[] = $name;
                 }
-                foreach ($teacher->schedules as $schedule) {
-                    $schedules[] = $schedule;
+    
+                foreach ($teacher->schedules ?? [] as $schedule) {
+                    if ($schedule) {
+                        $schedules[] = $schedule;
+                    }
                 }
             }
-        }        
-        $titles = $titlesCollect->all();        
-        $schedules = ScheduleRepository::sortManySchedules($schedules);
-        return self::generateSchedules($schedules, $titles);  
-    }
+        }
+    
+        if ($schedules->isEmpty()) {
+            return '<p>Нет расписаний для отображения.</p>';
+        }
+    
+        $schedules = GetSchedule::sortSchedulesCollection($schedules);
+    
+        return self::generateSchedules($schedules, $titlesCollect->all());
+    }    
 
 }

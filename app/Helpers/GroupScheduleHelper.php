@@ -6,7 +6,7 @@ use App\Models\Course;
 use App\Models\Faculty;
 use App\Models\Group;
 use App\Models\Schedule;
-use App\Services\GetFromDatabase\ScheduleRepository;
+use App\Services\GetFromDatabase\GetSchedule;
 
 class GroupScheduleHelper extends ScheduleHelper
 {
@@ -22,29 +22,36 @@ class GroupScheduleHelper extends ScheduleHelper
         };
     }
 
-    public static function generateCourseSchedule(Faculty $faculty = null, Course $course = null) : string
+    public static function generateCourseSchedule(Faculty $faculty = null, Course $course = null): string
     {
-        if ($faculty) {
+        if ($faculty instanceof Faculty) {
             $groupsModel = $faculty->groups;
         } else {
-            $groupsModel = Group::get();
+            $groupsModel = Group::all();
         }
-        if ($course) {
-            $groupsModel = $groupsModel->where('course_id', '=', $course['id']);
+    
+        if ($course instanceof Course) {
+            $groupsModel = $groupsModel->where('course_id', $course->id);
         }
-        $titles = $groupsModel->map(function($item, $key) {
-            return $item['nameGroup'];
-        })->all();
-        $groupsSchedules = $groupsModel->map(function($group) {            
-            return $group->schedules;
-        });
+    
+        if ($groupsModel->isEmpty()) {
+            return '<p>Нет данных для отображения расписания.</p>';
+        }
+    
+        $titles = $groupsModel->map(fn($group) => $group->nameGroup)->all();
+    
         $schedules = collect();
-        foreach ($groupsSchedules as $groupSchedules) {
-            foreach ($groupSchedules as $schedule) {
-                $schedules[] = $schedule;
+        foreach ($groupsModel as $group) {
+            foreach ($group->schedules ?? [] as $schedule) {
+                if ($schedule) {
+                    $schedules[] = $schedule;
+                }
             }
         }
-        $schedules = ScheduleRepository::sortManySchedules($schedules);
-        return self::generateSchedules($schedules, $titles);        
+    
+        $schedules = GetSchedule::sortSchedulesCollection($schedules);
+    
+        return self::generateSchedules($schedules, $titles);
     }
+    
 }

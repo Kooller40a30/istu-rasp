@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GetFromDatabase\CoursesRepository;
+use App\Services\GetFromDatabase\GetCourses;
 use Illuminate\Http\Request;
 
 class CoursesController extends Controller 
@@ -16,7 +16,7 @@ class CoursesController extends Controller
 
     public static function getList($faculty)
     {
-        $courses = CoursesRepository::findAll($faculty);
+        $courses = GetCourses::findAll($faculty);
         $list = '<option value="">Все курсы</option>';
         foreach ($courses as $course) {
             $id = $course['id'];
