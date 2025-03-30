@@ -99,8 +99,12 @@ class GroupsController extends Controller
         $facultyName = $faculty?->shortNameFaculty ?? 'Все институты';
         $courseName  = $course?->nameCourse        ?? 'Все курсы';
         $groupName   = $group?->nameGroup          ?? 'Все группы';
-    
-        $header = "Институт: {$facultyName}<br>Курс: {$courseName}<br>Группа: {$groupName}";
+
+        $header = $this->makeScheduleHeader([
+            "Институт: {$facultyName}",
+            "Курс: {$courseName}",
+            "Группа: {$groupName}"
+        ]);
     
         if ($group) {
             $result = GroupScheduleHelper::generateSchedule($group->schedules(), $groupName);

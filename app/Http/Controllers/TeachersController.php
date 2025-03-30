@@ -126,7 +126,11 @@ class TeachersController extends Controller
         $depName      = $dep?->nameDepartment        ?? 'Все кафедры';
         $teacherName  = $teacher?->shortNameTeacher  ?? 'Все преподаватели';
     
-        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Преподаватель: {$teacherName}";
+        $header = $this->makeScheduleHeader([
+            "Институт: {$facultyName}",
+            "Кафедра: {$depName}",
+            "Преподаватель: {$teacherName}"
+        ]);
     
         if ($teacher) {
             $result = TeacherScheduleHelper::generateSchedule($teacher->schedules(), $teacherName);

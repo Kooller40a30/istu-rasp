@@ -100,7 +100,14 @@ abstract class ScheduleHelper
             $type = $schedule->getTypeDiscipline['shortName'];
             $validKeys = $condition($schedule, $titles);
             foreach ($validKeys as $key) {
-                $listTd[$key] = "<td>({$type}) {$disc}{$teacherText}{$groupText}{$room}</td>";
+                $cssClass = match($type) {
+                    'ЛБ' => 'lab',
+                    'Л'  => 'lecture',
+                    'П'  => 'practice',
+                    default => 'other',
+                };
+
+                $listTd[$key] = "<td class=\"$cssClass\">({$type}) {$disc}{$teacherText}{$groupText}{$room}</td>";
             }
         }
         return implode('', $listTd);

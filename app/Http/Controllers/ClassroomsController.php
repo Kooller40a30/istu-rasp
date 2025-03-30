@@ -146,8 +146,12 @@ class ClassroomsController extends Controller
         $depName        = $dep?->nameDepartment           ?? 'Все кафедры';
         $classroomName  = $classroom?->numberClassroom    ?? 'Все аудитории';
     
-        $header = "Институт: {$facultyName}<br>Кафедра: {$depName}<br>Аудитория: {$classroomName}";
-    
+        $header = $this->makeScheduleHeader([
+            "Институт: {$facultyName}",
+            "Кафедра: {$depName}",
+            "Аудитория: {$classroomName}"
+        ]);
+
         if ($classroom) {
             $result = ClassroomScheduleHelper::generateSchedule($classroom->schedules(), $classroomName, true);
         } else {
