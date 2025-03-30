@@ -1,29 +1,60 @@
 $(function () {
 
-    // $('.selectize-js').selectize();
+    
+    function showLoading() {
+        $('#loading-indicator').show();
+    }
 
-    $('#btn-group').on('click', (event) => {
-        var data = $(event.target).parents('form').serializeArray();
-        $.get('/groups_schedule', data, (html, xhr) => {
+    function hideLoading() {
+        $('#loading-indicator').hide();
+    }
+
+    function fetchAndRender(url, data, button) {
+        const textSpan = button.find('.btn-text');
+        const spinner = button.find('.spinner-border');
+    
+        // Показать спиннер, спрятать текст
+        textSpan.addClass('d-none');
+        spinner.removeClass('d-none');
+        button.prop('disabled', true);
+    
+        showLoading();
+    
+        $.get(url, data, (html, xhr) => {
             $('#result-schedule').html(html).change();
+            hideLoading();
+    
+            // Вернуть кнопку в исходное состояние
+            textSpan.removeClass('d-none');
+            spinner.addClass('d-none');
+            button.prop('disabled', false);
+        }).fail(() => {
+            hideLoading();
+            textSpan.removeClass('d-none');
+            spinner.addClass('d-none');
+            button.prop('disabled', false);
+            alert('Ошибка загрузки расписания');
         });
+    }
+    
+    
+
+    $('#btn-group').on('click', function (event) {
         event.preventDefault();
+        const data = $(this).parents('form').serializeArray();
+        fetchAndRender('/groups_schedule', data, $(this));
     });
-
-    $('#btn-teacher').on('click', (event) => {
-        var data = $(event.target).parents('form').serializeArray();
-        $.get('/teacher_schedule', data, (html, xhr) => {
-            $('#result-schedule').html(html).change();
-        });
+    
+    $('#btn-teacher').on('click', function (event) {
         event.preventDefault();
+        const data = $(this).parents('form').serializeArray();
+        fetchAndRender('/teacher_schedule', data, $(this));
     });
-
-    $('#btn-room').on('click', (event) => {
-        var data = $(event.target).parents('form').serializeArray();
-        $.get('/classroom_schedule', data, (html, xhr) => {
-            $('#result-schedule').html(html).change();
-        });
+    
+    $('#btn-room').on('click', function (event) {
         event.preventDefault();
+        const data = $(this).parents('form').serializeArray();
+        fetchAndRender('/classroom_schedule', data, $(this));
     });
 
     $('#group_faculty').on('change', (event) => {

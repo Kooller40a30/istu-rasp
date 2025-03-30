@@ -35,7 +35,10 @@
             </div>
 
             <div class="row">
-                <input type="submit" class="btn btn-primary" name="show" value="Показать" id="btn-room">
+                <button type="submit" class="btn btn-primary" id="btn-room">
+                    <span class="btn-text">Показать</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
