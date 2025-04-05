@@ -6,7 +6,7 @@
             @csrf
             <div class="row">
                 <label for="group_faculty" class="form-label">Выберите институт/факультет</label>
-                <select class="form-select mb-3" name="faculty" id="group_faculty">
+                <select class="form-select mb-3 selectize-js" name="faculty" id="group_faculty">
                     <option disabled selected>Выберите институт/факультет</option>
                     @foreach($facultiesGroup as $faculty)
                         <option value="{{$faculty->id}}">{{$faculty->nameFaculty}}</option>
@@ -16,7 +16,7 @@
 
             <div class="row">
                 <label for="course-dropdown" class="form-label">Выберите курс</label>
-                <select class="form-select mb-3" name="course" id="course-dropdown">
+                <select class="form-select mb-3 selectize-js" name="course" id="course-dropdown">
                     <option disabled selected>Выберите курс</option>
                     @if(isset($courses))
                         @foreach($courses as $course)                            
@@ -28,7 +28,7 @@
 
             <div class="row">
                 <label for="group-dropdown" class="form-label">Выберите группу</label>
-                <select class="form-select mb-3" name="group" id="group-dropdown">
+                <select class="form-select mb-3 selectize-js" name="group" id="group-dropdown">
                     <option disabled selected>Выберите группу</option>
                     @foreach($groups as $group)
                         <option value="{{$group->id}}">{{$group->nameGroup}}</option>
