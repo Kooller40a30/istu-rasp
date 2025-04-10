@@ -4,6 +4,7 @@ namespace App\Services\GetFromDatabase;
 
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Репозиторий для получения курсов групп.
@@ -18,9 +19,12 @@ class GetGroupsCourses
      */
     public static function findCoursesByFaculty(int $facultyId): Collection
     {
-        return Group::select('faculty_id', 'course_id')
+        Log::info('[GetGroupsCourses] Action: Finding courses by faculty', ['facultyId' => $facultyId]);
+        $result = Group::select('faculty_id', 'course_id')
             ->where('faculty_id', $facultyId)
             ->groupBy('faculty_id', 'course_id')
             ->get();
+        Log::info('[GetGroupsCourses] Action: Found courses by faculty', ['count' => $result->count()]);
+        return $result;
     }
 }

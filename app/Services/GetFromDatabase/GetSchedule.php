@@ -5,6 +5,8 @@ namespace App\Services\GetFromDatabase;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Репозиторий для работы с расписаниями.
@@ -14,31 +16,36 @@ class GetSchedule
     /**
      * Получает отсортированные расписания для указанной недели.
      *
-     * @param Builder|HasMany $relation Запрос или отношение, содержащее расписания.
+     * @param Builder|HasMany|HasManyThrough $relation Запрос или отношение, содержащее расписания.
      * @param int $week Номер недели.
      * @return Collection Отсортированная коллекция расписаний.
      */
-    public static function getSortedSchedulesForWeek($relation, int $week): Collection
+    public static function getSortedSchedulesForWeek(Builder|HasMany|HasManyThrough $relation, int $week): Collection
     {
-        return $relation
+        Log::info('[GetSchedule] Action: Getting sorted schedules for week', ['week' => $week]);
+        $result = $relation
             ->orderBy('class')
             ->orderBy('week')
             ->orderBy('day')
             ->where('week', '=', $week)
             ->get();
+        Log::info('[GetSchedule] Action: Retrieved sorted schedules', ['count' => $result->count()]);
+        return $result;
     }
 
     /**
      * Сортирует коллекцию расписаний по дню, классу и неделе.
      *
-     * @param Collection $collection Коллекция расписаний.
-     * @return Collection Отсортированная коллекция расписаний.
+     * @param \Illuminate\Support\Collection $collection Коллекция расписаний (может содержать не только модели Schedule).
+     * @return \Illuminate\Support\Collection Отсортированная коллекция расписаний.
      */
-    public static function sortSchedulesCollection(\Illuminate\Support\Collection $collection)
+    public static function sortSchedulesCollection(\Illuminate\Support\Collection $collection): \Illuminate\Support\Collection
     {
-        return $collection
+        Log::info('[GetSchedule] Action: Sorting schedules collection', ['initial_count' => $collection->count()]);
+        $sorted = $collection
             ->filter(function ($item) {
-                return $item && isset($item->day, $item->class, $item->week);
+                return is_object($item) && isset($item->day, $item->class, $item->week)
+                    || is_array($item) && isset($item['day'], $item['class'], $item['week']);
             })
             ->sortBy([
                 ['day', 'asc'],
@@ -46,5 +53,7 @@ class GetSchedule
                 ['week', 'asc'],
             ])
             ->values();
+        Log::info('[GetSchedule] Action: Sorted schedules collection', ['sorted_count' => $sorted->count()]);
+        return $sorted;
     }    
 }

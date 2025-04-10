@@ -4,6 +4,7 @@ namespace App\Services\GetFromDatabase;
 
 use App\Models\Classroom;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Репозиторий для работы с аудиториями.
@@ -21,6 +22,7 @@ class GetClassrooms
      */
     public static function findAll(int $facultyId = 0, int $departmentId = 0): Collection
     {
+        Log::info('[GetClassrooms] Action: Finding all classrooms', ['facultyId' => $facultyId, 'departmentId' => $departmentId]);
         $query = Classroom::select(
             'classrooms.id',
             'numberClassroom',
@@ -36,9 +38,11 @@ class GetClassrooms
             $query->where('classrooms.department_id', $departmentId);
         }
 
-        return $query->join('schedules', 'classrooms.id', '=', 'schedules.classroom_id')
+        $result = $query->join('schedules', 'classrooms.id', '=', 'schedules.classroom_id')
             ->groupBy('classrooms.id', 'numberClassroom')
             ->orderBy('numberClassroom')
             ->get();
+        Log::info('[GetClassrooms] Action: Found classrooms', ['count' => $result->count()]);
+        return $result;
     }
 }

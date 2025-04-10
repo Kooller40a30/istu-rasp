@@ -100,7 +100,7 @@ abstract class TemplateScheduleParser
     }
 
     /**
-     * Удаляет повторяющиеся строки из текста.
+     * Удаляет повторяющиеся строки из текста и нормализует его.
      *
      * @param string $text Исходный текст с разделителями строк.
      * @param bool   $all  Если true, возвращает все уникальные строки, иначе только первую.
@@ -108,8 +108,30 @@ abstract class TemplateScheduleParser
      */
     protected static function removeDuplicateLines(string $text, bool $all = false)
     {
-        $uniqueLines = array_unique(explode("\n", $text));
-        return $all ? $uniqueLines : ($uniqueLines[0] ?? $text);
+        if (empty($text)) {
+            return $all ? [] : '';
+        }
+
+        // Разбиваем на строки и удаляем пустые
+        $lines = array_filter(explode("\n", $text), function($line) {
+            return !empty(trim($line));
+        });
+
+        // Нормализуем каждую строку (удаляем лишние пробелы и приводим к верхнему регистру)
+        $normalizedLines = array_map(function($line) {
+            return trim(mb_strtoupper($line));
+        }, $lines);
+
+        // Получаем уникальные строки
+        $uniqueLines = array_unique($normalizedLines);
+
+        // Если нужно вернуть все строки
+        if ($all) {
+            return $uniqueLines;
+        }
+
+        // Возвращаем первую непустую строку или пустую строку, если все строки пустые
+        return reset($uniqueLines) ?: '';
     }
 
     /**

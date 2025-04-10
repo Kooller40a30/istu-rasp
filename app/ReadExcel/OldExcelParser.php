@@ -180,12 +180,16 @@ class OldExcelParser extends TemplateScheduleParser
         }
 
         $disc = $this->getCellValue($row + 1, $col);
+        Log::info('Discipline extracted from Excel', ['discipline' => $disc]);
         $classroomData = static::findClassroom($this->getCellValue($row, static::nextLetter($col, 2)));
         $classroom_id = $classroomData['id'] ?? null;
         $time = date('H:i:s', strtotime(str_replace('-', ':', $this->getTimeCell($row, $col))));
         $class = ClassModel::where('start_time', $time)->first()['id'] ?? null;
-        $discipline_id = DisciplineService::addDiscipline($disc)->value('id');
-        $type_discipline_id = TypeDisciplineService::addTypeDiscipline($typeDisc)->value('id');
+        // Получаем модель Discipline
+        $disciplineModel = DisciplineService::addDiscipline($disc);
+        // Получаем id из модели
+        $discipline_id = $disciplineModel->id;
+        $type_discipline_id = TypeDisciplineService::addTypeDiscipline($typeDisc)->id;
 
         Log::info("Добавление расписания: день {$day}, неделя {$week}, время {$time}, дисциплина {$disc}");
 

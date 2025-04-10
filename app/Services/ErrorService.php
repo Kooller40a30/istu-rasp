@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Error;
 use Illuminate\Support\Facades\Log;
-use Exception;
+use InvalidArgumentException;
 
 class ErrorService
 {
@@ -12,12 +12,14 @@ class ErrorService
      * Метод для добавления ошибки в таблицу.
      *
      * @param array $data Данные для записи
+     * @param bool $logToSystem Логировать ли ошибку записи в системный лог
      * @return Error|null
+     * @throws InvalidArgumentException Если отсутствуют обязательные поля в $data
      */
     public static function logError(array $data, bool $logToSystem = true): ?Error
     {
         try {
-            // Подготовка данных
+            // Подготовка данных (можно совместить с валидацией)
             $errorData = [
                 'file' => $data['file'] ?? null,
                 'group' => $data['group'] ?? null,
@@ -31,25 +33,24 @@ class ErrorService
             ];
     
             // Валидация обязательных полей
-            foreach (['file', 'day', 'week', 'value'] as $field) {
-                if (empty($errorData[$field])) {
-                    throw new Exception("Поле '{$field}' обязательно для заполнения.");
+            $requiredFields = ['file', 'day', 'week', 'value'];
+            foreach ($requiredFields as $field) {
+                // Проверяем именно наличие и непустое значение после подготовки
+                if (empty($errorData[$field])) { 
+                    throw new InvalidArgumentException("Поле '{$field}' обязательно для логгирования ошибки.");
                 }
             }
             
             return Error::create($errorData);
             
-        } catch (Exception $e) {
+        } catch (InvalidArgumentException $e) {
+             // Перебрасываем ошибку валидации, так как это проблема вызывающего кода
+             throw $e;
+        } catch (\Throwable $e) { // Ловим Throwable для большей надежности
             if ($logToSystem) {
-                // Логирование только сообщения исключения и первого предыдущего, если есть
-                Log::debug('Data before inserting into database:', $errorData);
-                $logMessage = 'Не удалось записать ошибку: ' . $e->getMessage();
-                if ($e->getPrevious()) {
-                    $logMessage .= ' | Предыдущее исключение: ' . $e->getPrevious()->getMessage();
-                }
-    
-                Log::error($logMessage, [
-                    'data' => $data
+                Log::error('Не удалось записать ошибку в БД: ' . $e->getMessage(), [
+                    'exception' => $e, // Логируем полное исключение со стектрейсом
+                    'original_data' => $data // Логируем исходные данные
                 ]);
             }
             return null;
@@ -67,7 +68,7 @@ class ErrorService
     public static function invalidTimeFormat(string $invalidTime, array $context = []): ?Error
     {
         $context = self::mergeContext($context);
-        $context['value'] = "Invalid time format: {$invalidTime}";
+        $context['value'] = "Неверный формат времени: {$invalidTime}";
         return self::logError($context);
     }
 
@@ -82,6 +83,7 @@ class ErrorService
     {
         $context = self::mergeContext($context);
         $context['group'] = $group;
+        $context['value'] = $context['value'] ?? "Ошибка данных группы: {$group}";
         return self::logError($context);
     }
 
@@ -96,6 +98,7 @@ class ErrorService
     {
         $context = self::mergeContext($context);
         $context['teacher'] = $teacher;
+        $context['value'] = $context['value'] ?? "Ошибка данных преподавателя: {$teacher}";
         return self::logError($context);
     }
 
@@ -110,7 +113,7 @@ class ErrorService
     {
         $context = self::mergeContext($context);
         $context['classroom'] = $audience;
-        $context['value'] = "Invalid audience: {$audience}";
+        $context['value'] = $context['value'] ?? "Ошибка привязки аудитории: {$audience}";
         return self::logError($context);
     }
 
@@ -125,6 +128,7 @@ class ErrorService
     {
         $context = self::mergeContext($context);
         $context['discipline'] = $discipline;
+        $context['value'] = $context['value'] ?? "Ошибка данных дисциплины: {$discipline}";
         return self::logError($context);
     }
 
@@ -139,7 +143,7 @@ class ErrorService
     {
         $context = self::mergeContext($context);
         $context['class'] = $class;
-        $context['value'] = 'Invalid class data format';
+        $context['value'] = $context['value'] ?? "Ошибка данных класса: {$class}";
         return self::logError($context);
     }
 
@@ -154,14 +158,13 @@ class ErrorService
         return [
             'file' => $context['file'] ?? 'unknown_file',
             'group' => $context['group'] ?? null,
-            'day' => $context['day'] ?? 'unknown_day',
-            'week' => $context['week'] ?? 'unknown_week',
+            'day' => $context['day'] ?? 0,
+            'week' => $context['week'] ?? 0,
             'class' => $context['class'] ?? null,
-            'value' => $context['value'] ?? "unexpected_error",
+            'value' => $context['value'] ?? null,
             'teacher' => $context['teacher'] ?? null,
             'classroom' => $context['classroom'] ?? null,
             'discipline' => $context['discipline'] ?? null,
-            //ДА еБАННЫЙ РОТ ЭТОЙ ПИЗДЫ БЛЯТЬ
         ];
     }
 }

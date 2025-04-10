@@ -4,6 +4,7 @@ namespace App\Services\GetFromDatabase;
 
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Репозиторий для работы с преподавателями.
@@ -19,7 +20,8 @@ class GetTeachers
      */
     public static function findTeachers(?int $facultyId = null, ?int $departmentId = null): Collection
     {
-        return Teacher::select('teachers.id', 'shortNameTeacher')
+        Log::info('[GetTeachers] Action: Finding teachers', ['facultyId' => $facultyId, 'departmentId' => $departmentId]);
+        $result = Teacher::select('teachers.id', 'shortNameTeacher')
             ->join('teacher_schedule', 'teachers.id', '=', 'teacher_schedule.teacher_id')
             ->join('department_teacher', 'teachers.id', '=', 'department_teacher.teacher_id')
             ->join('departments', 'departments.id', '=', 'department_teacher.department_id')
@@ -32,5 +34,7 @@ class GetTeachers
             ->groupBy('teachers.id', 'shortNameTeacher')
             ->orderBy('shortNameTeacher')
             ->get();
+        Log::info('[GetTeachers] Action: Found teachers', ['count' => $result->count()]);
+        return $result;
     }
 }

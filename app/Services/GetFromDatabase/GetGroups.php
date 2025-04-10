@@ -4,6 +4,7 @@ namespace App\Services\GetFromDatabase;
 
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Репозиторий для работы с группами.
@@ -19,7 +20,8 @@ class GetGroups
      */
     public static function findGroups(int $faculty = 0, int $course = 0): Collection
     {
-        return Group::select('id', 'nameGroup')
+        Log::info('[GetGroups] Action: Finding groups', ['faculty' => $faculty, 'course' => $course]);
+        $result = Group::select('id', 'nameGroup')
             ->when($faculty, function ($query, $faculty) {
                 $query->where('faculty_id', $faculty);
             })
@@ -27,6 +29,8 @@ class GetGroups
                 $query->where('course_id', $course);
             })
             ->get();
+        Log::info('[GetGroups] Action: Found groups', ['count' => $result->count()]);
+        return $result;
     }
 
     /**
@@ -37,10 +41,13 @@ class GetGroups
      */
     public static function findCourses(int $faculty): Collection
     {
-        return Group::select('course')
+        Log::info('[GetGroups] Action: Finding courses for faculty', ['faculty' => $faculty]);
+        $result = Group::select('course')
             ->where('faculty_id', $faculty)
             ->distinct()
             ->orderBy('course')
             ->get();
+        Log::info('[GetGroups] Action: Found courses for faculty', ['count' => $result->count()]);
+        return $result;
     }
 }

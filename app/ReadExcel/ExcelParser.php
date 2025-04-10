@@ -65,6 +65,7 @@ class ExcelParser extends TemplateScheduleParser
     protected function processSchedule(&$row, string $col)
     {
         $discipline = $this->getCellValue($row, $col);
+        Log::info('Discipline extracted from Excel', ['discipline' => $discipline]);
         if (!$discipline) {
             Log::debug("Пустая дисциплина в строке {$row}, колонка {$col}. Пропускаем.");
             return;
@@ -115,7 +116,12 @@ class ExcelParser extends TemplateScheduleParser
 
     protected function addSchedule($row, string $col, string $discipline)
     {
-        $shortNameTypeDisc = static::removeDuplicateLines($this->getCellValue($row, static::getNextLetter($col, 1)));
+        $rawTypeDisc = $this->getCellValue($row, static::getNextLetter($col, 1));
+        Log::info("ExcelParser: Сырое значение типа дисциплины из ячейки: '{$rawTypeDisc}'");
+        
+        $shortNameTypeDisc = static::removeDuplicateLines($rawTypeDisc);
+        Log::info("ExcelParser: Обработанное значение типа дисциплины: '{$shortNameTypeDisc}'");
+        
         if (!$shortNameTypeDisc) {
             Log::warning("Отсутствует тип дисциплины в строке {$row}, колонка " . static::getNextLetter($col, 1));
             return false;
@@ -127,8 +133,11 @@ class ExcelParser extends TemplateScheduleParser
         $week = $row % 2 == 0 ? static::FIRST_WEEK_NUMBER : static::SECOND_WEEK_NUMBER;
         $class = $this->getCellValue($row % 2 == 0 ? $row : $row - 1, static::CLASS_NUMBER_COLUMN_INDEX);
 
-        $disciplineId = DisciplineService::addDiscipline(static::removeDuplicateLines($discipline))->value('id');
-        $typeDisciplineId = TypeDisciplineService::addTypeDiscipline($shortNameTypeDisc)->value('id');
+        // Получаем модель Discipline
+        $disciplineModel = DisciplineService::addDiscipline(static::removeDuplicateLines($discipline));
+        // Получаем id из модели
+        $disciplineId = $disciplineModel->id;
+        $typeDisciplineId = TypeDisciplineService::addTypeDiscipline($shortNameTypeDisc)->id;
 
         $attributes = [
             'day'               => $day,
